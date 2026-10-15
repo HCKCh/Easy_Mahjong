@@ -1,0 +1,1 @@
+{"version":3,"file":"roomRules.js","sourceRoot":"","sources":["../../../src/core/rules/roomRules.ts"],"names":[],"mappings":"AASA,MAAM,CAAC,MAAM,gBAAgB,GAAc;IACzC,OAAO,EAAE,QAAQ;IACjB,eAAe,EAAE,iBAAiB;IAClC,MAAM,EAAE,CAAC;CACV,CAAC;AAEF,MAAM,UAAU,cAAc,CAAC,YAAgC,EAAE;IAC/D,OAAO,EAAC,GAAG,gBAAgB,EAAE,GAAG,SAAS,EAAC,CAAC;AAC7C,CAAC"}

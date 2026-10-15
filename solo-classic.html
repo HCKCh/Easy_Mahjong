@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#153f35" />
+  <title>東西南北麻將托兒所 · 單機版</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <meta name="theme-color" content="#0b5e45" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+</head>
+<body>
+  <div id="app"></div>
+  <script type="module" src="/dist/web/app.js"></script>
+  <script>if("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(()=>{});</script>
+</body>
+</html>

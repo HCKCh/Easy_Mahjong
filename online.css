@@ -1,0 +1,336 @@
+:root{
+  font-family:Inter,"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  color:#f8f4e9;background:#08281f;
+  --felt:#0b6b4c;--felt-dark:#075139;--felt-deep:#043b2b;
+  --rail:#171816;--rail2:#2c251e;--gold:#f0ca63;--cream:#fffbed;
+  --panel:#0c4635;--panel2:#103c30;--line:#ffffff18;--red:#c84b3d;
+  --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#08281f}body{overflow-x:hidden}button,input{font:inherit}button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}.desktop-only{display:inline}
+
+/* ---------- Mobile-first entry / lobby ---------- */
+.start-wrap,.lobby-wrap{min-height:100dvh;display:grid;place-items:center;padding:18px;background:radial-gradient(circle at 50% 0,#288468 0,#0f513e 31%,#082e25 72%,#041d18 100%)}
+.start-card,.lobby-card{width:min(620px,100%);background:#f8f4ea;color:#19352c;padding:24px;border-radius:24px;box-shadow:0 24px 70px #0008;border:1px solid #ffffff70}
+.mobile-topbar{display:flex;justify-content:space-between;align-items:center;gap:10px}.ghost-btn{border:0!important;background:#e7eee9!important;color:#265143!important;padding:8px 10px!important;font-size:12px!important}
+.eyebrow{font-size:11px;letter-spacing:.16em;font-weight:950;color:#806b3d}.start-card h1,.lobby-card h1{font-size:clamp(34px,9vw,48px);margin:8px 0 8px}.lead,.room-sub{margin:0 0 18px;color:#5f716a;line-height:1.55}.connection-inline{display:inline-flex;margin:0 0 16px;padding:6px 10px;border-radius:999px;background:#e4efe9;color:#2d5c49;font-size:12px;font-weight:800}
+.start-card label{display:grid;gap:7px;text-align:left;font-weight:800}.start-card input,.join-row input{width:100%;padding:14px;border:1px solid #cfd7d2;border-radius:13px;background:#fff;font-size:16px}.wide{width:100%}.big-action{min-height:52px;font-size:17px;margin-top:12px}.primary,.win{background:#176044!important;color:#fff!important;border-color:#176044!important}
+.start-card button,.lobby-card button,.actions button,.result button,.side-panel button,.mobile-sheet button,.rotate-hint button{padding:12px 16px;border-radius:13px;border:1px solid #bdc9c1;background:white;color:#17352c;cursor:pointer;font-weight:850}
+.join-row{display:grid;grid-template-columns:1fr auto;gap:8px}.or{display:flex;align-items:center;gap:10px;margin:18px 0;color:#809088;font-size:12px}.or::before,.or::after{content:"";height:1px;background:#d9dfdc;flex:1}.back-link{color:inherit;text-decoration:none;font-weight:800}.tip{color:#6d7d77;font-size:12px;line-height:1.55}.room-code{font-size:40px;letter-spacing:.18em;font-weight:950;margin:10px 0;text-align:center;color:#174f3d}.invite-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}.invite-actions button:first-child{grid-column:1/-1}.seat-list{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:18px 0}.seat-row{display:flex;gap:10px;align-items:center;background:white;border-radius:14px;padding:11px;box-shadow:0 6px 18px #1d47351a}.seat-copy{min-width:0}.seat-row b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.seat-row small{display:block;opacity:.6;font-size:11px}.seat-mark,.wind{display:inline-grid;place-items:center;width:29px;height:29px;border-radius:50%;background:#175b43;color:white;flex:0 0 auto}.lobby-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.mobile-benefits{display:flex;flex-wrap:wrap;gap:7px;margin-top:18px}.mobile-benefits span{font-size:11px;background:#eef3f0;color:#577068;padding:6px 8px;border-radius:999px}
+
+/* ---------- Shell ---------- */
+.online-shell{height:100dvh;min-height:100dvh;background:#0a3528;display:flex;flex-direction:column;overflow:hidden}.online-shell header{height:44px;min-height:44px;padding:calc(var(--safe-top) / 3) 8px 0;display:flex;justify-content:space-between;align-items:center;background:#f7f3e8;color:#15372c;gap:8px;font-size:10px;border-bottom:1px solid #d9d1bf;box-shadow:0 2px 12px #0002;z-index:20}.online-shell header a{font-weight:950;color:inherit;text-decoration:none;font-size:16px;white-space:nowrap}.header-mid{font-weight:800;min-width:0;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.your-turn{color:#b3482e}.header-score{font-variant-numeric:tabular-nums;white-space:nowrap}.game-menu{display:grid;place-items:center;width:36px;height:32px;border:0;border-radius:10px;background:#e5ece7;color:#244c3d;font-size:18px;cursor:pointer}.game-layout{display:grid;grid-template-columns:1fr;flex:1;min-height:0}.table-area{min-width:0;min-height:0;padding:2px;background:#0a3528;display:flex;flex-direction:column}.table-wrap{flex:1;min-height:0;display:grid;place-items:center;position:relative}.table{width:100%;height:100%;min-height:0;position:relative;overflow:hidden;border-radius:13px;background:linear-gradient(#ffffff05,#00000008),radial-gradient(ellipse at 50% 44%,#147959 0,#0b674b 43%,#07543d 72%,#064630 100%);box-shadow:inset 0 0 0 5px var(--rail),inset 0 0 0 10px var(--rail2),inset 0 0 42px #0007}.table::before{content:"";position:absolute;inset:12% 9% 17%;border:1.5px solid #001f1766;clip-path:polygon(17% 0,83% 0,100% 22%,100% 78%,83% 100%,17% 100%,0 78%,0 22%);background:linear-gradient(135deg,#ffffff03,#00000005);pointer-events:none}
+
+/* ---------- Decorative walls ---------- */
+.wall{position:absolute;display:flex;gap:1px;z-index:1;pointer-events:none;opacity:.92}.wall.top{top:5px;left:50%;transform:translateX(-50%)}.wall.bottom{bottom:16%;left:50%;transform:translateX(-50%)}.wall.left{left:7px;top:50%;transform:translateY(-50%);flex-direction:column}.wall.right{right:7px;top:50%;transform:translateY(-50%);flex-direction:column}.wall-tile{width:16px;height:27px;border-radius:3px;background:linear-gradient(90deg,#078c2e,#14ba38 42%,#0a912e);border:1px solid #0add45;box-shadow:inset -3px 0 0 #087326,0 2px 3px #0007}.wall.left .wall-tile,.wall.right .wall-tile{width:27px;height:16px;background:linear-gradient(#078c2e,#14ba38 42%,#0a912e);box-shadow:inset 0 -3px 0 #087326,0 2px 3px #0007}
+
+/* ---------- Players ---------- */
+.opp,.you{position:absolute;text-align:center;z-index:5;color:#f8f4e9}.player-meta{display:inline-flex;align-items:center;gap:4px;padding:3px 5px;border-radius:10px;background:#082b21d6;backdrop-filter:blur(3px);box-shadow:0 3px 12px #0005}.player-avatar{width:25px;height:25px;border-radius:8px;display:grid;place-items:center;font-size:12px;font-weight:950;background:linear-gradient(145deg,#f9e9bd,#dcb76b);color:#174333;border:1px solid #fff8dc}.player-name{max-width:70px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:900;font-size:10px}.player-score{color:#f8cc57;font-weight:900;font-size:10px;font-variant-numeric:tabular-nums}.player-status{font-size:9px;color:#ffb692;font-style:normal}.wind{width:21px;height:21px;margin:0;border:1px solid #ffffff30;background:#0e7a58;font-size:10px}.dealer{font-style:normal;background:#d7aa32;color:#20352d;border-radius:6px;padding:1px 4px;font-size:8px;font-weight:950}.opp.active .player-meta,.you.active .player-meta{box-shadow:0 0 0 2px #ffe078,0 0 18px #ffdc6b88}.opp.top{top:6.5%;left:50%;transform:translateX(-50%)}.opp.left{left:3%;top:50%;transform:translateY(-50%)}.opp.right{right:3%;top:50%;transform:translateY(-50%)}.you{bottom:1.5%;left:50%;transform:translateX(-50%);width:99%}
+.backs,.hand,.melds{display:flex;gap:2px;justify-content:center;align-items:flex-end}.opp .backs{margin-top:4px}.opp.top .backs{max-width:66vw}.opp.left .backs,.opp.right .backs{flex-direction:column;position:absolute;top:50%;transform:translateY(-50%);margin:0;gap:0}.opp.left .backs{left:-20px}.opp.right .backs{right:-20px}.opp.left .backs .mj,.opp.right .backs .mj{width:15px;height:22px}.opp .melds{margin-top:3px;max-width:180px;flex-wrap:wrap}.opp.left .melds{position:absolute;left:30px;top:38px;flex-direction:column;align-items:flex-start}.opp.right .melds{position:absolute;right:30px;top:38px;flex-direction:column;align-items:flex-end}.you .melds{margin:0 0 3px;min-height:20px}.hand{margin-top:4px;gap:1px;flex-wrap:nowrap}.hand .mj.drawn-slot{margin-left:5px}.flower-note{display:none}
+
+/* ---------- Center ---------- */
+.center{position:absolute;left:50%;top:47%;transform:translate(-50%,-50%);width:94px;height:90px;z-index:3;display:grid;place-items:center;text-align:center;padding:6px;border-radius:13px;background:linear-gradient(145deg,#20242d,#11151b);border:4px solid #343947;box-shadow:0 8px 20px #0008,inset 0 0 0 1px #555c6a}.center::before{content:"";position:absolute;inset:-15px;border:1px solid #022e2266;transform:rotate(45deg);z-index:-1}.center .round{font-size:13px;color:#86e1d0;font-weight:900;line-height:1}.center strong{display:block;font-size:26px;color:#8ae4d5;line-height:1;margin:3px 0}.center small{display:block;color:#a8b7b2;font-size:8px}.center .continuation{font-size:8px;color:#ffd771}.last{position:absolute;top:calc(100% + 7px);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:8px;color:#e6ddc8;background:#082b21cc;padding:3px 6px;border-radius:999px}
+
+/* ---------- Rivers ---------- */
+.river{position:absolute;z-index:4;display:grid;gap:2px;place-items:center}.r-bottom{bottom:22%;left:50%;transform:translateX(-50%);grid-template-columns:repeat(6,20px)}.r-top{top:23%;left:50%;transform:translateX(-50%);grid-template-columns:repeat(6,20px)}.r-left{left:14%;top:50%;transform:translateY(-50%);grid-template-columns:repeat(3,19px)}.r-right{right:14%;top:50%;transform:translateY(-50%);grid-template-columns:repeat(3,19px)}.river .mj{filter:drop-shadow(0 2px 2px #0005)}.r-left .mj,.r-right .mj{transform:rotate(90deg);margin:3px 0}.r-left .mj.latest,.r-right .mj.latest{transform:rotate(90deg) translateY(-2px)}
+
+/* ---------- Tiles ---------- */
+.mj{width:clamp(24px,5.15vw,36px);height:clamp(35px,7.35vw,51px);border:0;border-radius:5px;background:linear-gradient(#fffefa,#f8f4e6 74%,#e8e0c8);color:#111;font-weight:950;font-size:clamp(11px,2.45vw,17px);line-height:1.02;white-space:pre-line;box-shadow:0 3px 0 #1d8b47,0 4px 5px #0007;cursor:pointer;padding:1px}.mj.suit-characters{color:#a62420}.mj.suit-bamboo{color:#0d6e43}.mj.suit-dots{color:#15588c}.mj.dragon-red{color:#bd2727}.mj.dragon-green{color:#14733d}.mj.dragon-white{color:#222}.mj.flower{color:#9a3f7a}.mj.honor{color:#111}.mj.small{width:19px;height:27px;font-size:8px;border-radius:3px;box-shadow:0 2px 0 #17733b,0 3px 4px #0005}.mj.back{background:linear-gradient(135deg,#13b53d,#0b852d);border:1px solid #e9f0dc;box-shadow:inset -3px 0 0 #086b25,0 2px 0 #075e21,0 3px 4px #0007;color:transparent}.mj.latest{outline:2px solid #ffd557;box-shadow:0 0 12px #ffdc5d,0 2px 0 #17733b;transform:translateY(-2px)}.mj.selected{transform:translateY(-10px);outline:2px solid #ffd557;box-shadow:0 0 14px #ffd557aa,0 3px 0 #1d8b47,0 4px 5px #0007}.mj:disabled{cursor:default}.meld{display:flex;gap:1px;margin:1px}
+
+/* ---------- Actions ---------- */
+.actionbar{height:58px;min-height:58px;padding-bottom:var(--safe-bottom);display:grid;place-items:center;position:relative;z-index:12;background:linear-gradient(transparent,#062a20 65%)}.actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:center}.actions button{min-width:54px;padding:9px 13px;background:#f7f1e3;color:#16382d;box-shadow:0 5px 15px #0004}.actions .win{background:#b83d31!important;border-color:#d5675e!important}.reaction-card{background:#082b21ec;border:1px solid #ffffff22;border-radius:16px;padding:7px 9px;box-shadow:0 10px 30px #0007}.reaction-head{display:flex;justify-content:space-between;gap:18px;font-size:10px;color:#d9e8e2;margin-bottom:5px}.reaction-head b{color:#ffd268}.own-actions{background:#082b21d9;padding:7px;border-radius:14px}
+/* 吃碰槓胡：浮在自己手牌右上方，遠離手機底部的滑動手勢區 */
+.hand-actions{position:absolute;right:0;bottom:100%;margin-bottom:6px;z-index:30;display:flex;justify-content:flex-end;pointer-events:none}.hand-actions>*{pointer-events:auto}.hand-actions .actions{justify-content:flex-end;flex-wrap:nowrap}
+
+/* ---------- Desktop side panel ---------- */
+.side-panel{display:none;background:linear-gradient(180deg,#165f48,#0e4e3b);border-left:1px solid #ffffff10;padding:18px 15px;color:#eff9f3;overflow:auto}.side-brand{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}.side-brand b{font-size:18px}.online-dot{width:9px;height:9px;border-radius:50%;background:#4be57e;box-shadow:0 0 12px #4be57e}.side-box{background:#0a3d2f;border:1px solid #ffffff14;border-radius:17px;padding:14px;margin-bottom:12px;box-shadow:inset 0 1px #ffffff0a}.side-box h3{margin:0 0 10px;font-size:14px}.side-row{display:flex;justify-content:space-between;gap:8px;padding:6px 0;font-size:12px;border-bottom:1px solid #ffffff0d}.side-row:last-child{border:0}.side-seat{display:flex;align-items:center;gap:6px;min-width:0}.mini-wind{width:21px;height:21px;border-radius:50%;display:grid;place-items:center;background:#0f7858;font-weight:900;flex:0 0 auto}.side-money{font-weight:900;color:#ffd367;font-variant-numeric:tabular-nums}.side-rule{font-size:12px;color:#c7ded5;line-height:1.65}.side-panel button{width:100%;margin-top:8px;background:#f8f4ea;border:0}.room-pill{font-size:20px;letter-spacing:.16em;font-weight:950;color:#ffe074}
+
+/* ---------- Mobile sheet ---------- */
+.mobile-sheet{position:fixed;left:0;right:0;bottom:0;z-index:42;background:#f8f4ea;color:#17382d;border-radius:22px 22px 0 0;padding:8px 16px calc(18px + var(--safe-bottom));transform:translateY(105%);transition:transform .22s ease;max-height:83dvh;overflow:auto;box-shadow:0 -24px 60px #0008}.mobile-sheet.open{transform:translateY(0)}.sheet-scrim{display:none;position:fixed;inset:0;background:#0008;z-index:41}.sheet-scrim.open{display:block}.info-handle{width:45px;height:4px;border-radius:999px;background:#c3ccc7;margin:3px auto 10px}.info-head{display:flex;justify-content:space-between;align-items:center}.info-head small{display:block;color:#687b73}.info-head b{font-size:26px;letter-spacing:.12em}.icon-btn{width:38px;height:38px;padding:0!important;border-radius:50%!important;font-size:22px}.info-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:12px 0}.sheet-section{padding:12px 0;border-top:1px solid #dfe5e1}.sheet-section h3{font-size:13px;margin:0 0 6px}.mobile-sheet .side-row{border-color:#dfe5e1;color:#17382d}.mobile-sheet .side-rule{color:#526a60}.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.info-grid div{background:#eef3f0;border-radius:12px;padding:10px}.info-grid small{display:block;color:#72837b;font-size:10px}.info-grid b{display:block;margin-top:2px}
+
+/* ---------- Portrait prompt ---------- */
+.rotate-hint{display:none;position:fixed;inset:44px 0 0;z-index:38;background:radial-gradient(circle at 50% 30%,#1c765b,#073d2e 70%);color:#fff;text-align:center;padding:24px;align-content:center;justify-items:center;gap:9px}.rotate-hint>div{font-size:56px;animation:tilt 1.8s ease-in-out infinite}.rotate-hint b{font-size:22px}.rotate-hint span{max-width:300px;color:#cae5da;line-height:1.55}.rotate-hint button{margin-top:8px}@keyframes tilt{0%,100%{transform:rotate(-12deg)}50%{transform:rotate(78deg)}}
+
+/* ---------- Modals / connection / results ---------- */
+.connection-toast{position:fixed;top:calc(52px + var(--safe-top));left:50%;transform:translateX(-50%);z-index:80;border-radius:999px;padding:6px 10px;font-size:10px;font-weight:850;box-shadow:0 5px 18px #0005;pointer-events:none}.connection-toast.ok{background:#164b39dd;color:#dff7eb;opacity:.68}.connection-toast.warn{background:#8c3f2fee;color:white}.connection-toast span{display:inline-block;width:7px;height:7px;border-radius:50%;background:#4be57e;margin-right:6px}.connection-toast.warn span{background:#ffb16f}.modal-backdrop,.result-overlay{position:fixed;inset:0;background:#000b;display:grid;place-items:center;z-index:70;padding:18px}.qr-card,.result{position:relative;background:#f8f4ea;color:#18342b;border-radius:24px;padding:24px;width:min(420px,94vw);max-height:90dvh;overflow:auto;box-shadow:0 28px 80px #0009;text-align:center}.qr-card img{width:min(260px,72vw);height:auto;border-radius:14px;margin:10px auto;background:white;padding:8px}.modal-close{position:absolute;right:12px;top:10px;border:0;background:#e7ece9;width:36px;height:36px;border-radius:50%;font-size:22px}.result-kicker{font-size:11px;color:#7a8a83;font-weight:900;letter-spacing:.1em}.score-line{display:flex;justify-content:space-between;padding:7px;border-bottom:1px solid #ddd}.payments{font-size:14px}
+
+/* ---------- Desktop ---------- */
+@media(min-width:1120px){
+  .desktop-only{display:inline}.online-shell header{height:52px;min-height:52px;padding:0 16px;font-size:13px}.online-shell header a{font-size:20px}.game-menu{display:none}.game-layout{grid-template-columns:minmax(0,1fr) 252px}.table-area{padding:10px}.table{width:min(100%,1280px);height:min(calc(100vh - 126px),820px);min-height:590px;border-radius:30px;box-shadow:inset 0 0 0 9px #171816,inset 0 0 0 17px #2a241e,inset 0 0 50px #0008,0 22px 48px #0008}.table::before{inset:64px 92px 86px;border-width:2px}.side-panel{display:block}.mobile-sheet,.sheet-scrim{display:none!important}.wall.top{top:10px}.wall.bottom{bottom:86px}.wall.left{left:16px}.wall.right{right:16px}.wall-tile{width:27px;height:43px}.wall.left .wall-tile,.wall.right .wall-tile{width:43px;height:27px}.opp.top{top:58px}.opp.left{left:48px}.opp.right{right:48px}.player-meta{gap:6px;padding:5px 8px;border-radius:12px}.player-avatar{width:34px;height:34px;font-size:18px}.player-name{max-width:108px;font-size:13px}.player-score{font-size:12px}.wind{width:27px;height:27px;font-size:12px}.dealer{font-size:12px;padding:2px 6px}.opp.left .backs{left:-37px}.opp.right .backs{right:-37px}.opp.left .backs .mj,.opp.right .backs .mj{width:24px;height:35px}.opp .melds{max-width:260px}.opp.left .melds{left:45px;top:48px}.opp.right .melds{right:45px;top:48px}.flower-note{display:block;font-size:11px;color:#d9f1c9;margin-top:3px;min-height:14px}.center{width:155px;height:145px;top:48%;padding:14px;border-radius:20px;border-width:8px}.center::before{inset:-29px;border-width:2px}.center .round{font-size:22px}.center strong{font-size:42px}.center small,.center .continuation{font-size:11px}.last{font-size:11px}.r-bottom{bottom:153px;grid-template-columns:repeat(6,30px)}.r-top{top:157px;grid-template-columns:repeat(6,30px)}.r-left{left:175px;grid-template-columns:repeat(3,29px)}.r-right{right:175px;grid-template-columns:repeat(3,29px)}.mj{width:43px;height:59px;font-size:20px;padding:2px}.mj.small{width:29px;height:40px;font-size:13px}.hand{gap:3px}.hand .mj.drawn-slot{margin-left:10px}.you{bottom:8px;width:min(96%,1080px)}.actionbar{height:58px;min-height:58px;background:none}.actions button{padding:12px 18px}.reaction-card{padding:9px 12px}.connection-toast{top:62px}
+}
+
+/* ---------- Phone landscape tuning ---------- */
+@media(max-width:1119px) and (orientation:landscape){
+  .desktop-only{display:none}.table{border-radius:12px}.online-shell header{height:40px;min-height:40px}.table-area{padding:2px}.actionbar{height:52px;min-height:52px}.opp.top{top:5.5%}.r-top{top:21%}.r-bottom{bottom:21.5%}.you{bottom:1%}.wall.bottom{bottom:15.5%}.center{top:46%}
+}
+@media(max-width:900px) and (max-height:520px) and (orientation:landscape){
+  .online-shell header{height:36px;min-height:36px}.online-shell header a{font-size:14px}.game-menu{width:32px;height:28px}.table::before{inset:10% 8% 18%}.opp.top{top:3.8%}.opp.left{left:2%}.opp.right{right:2%}.player-avatar{display:none}.player-meta{padding:2px 4px}.player-name{max-width:56px}.backs{opacity:.95}.center{width:82px;height:76px}.center strong{font-size:22px}.r-top{top:19%}.r-bottom{bottom:22%}.r-left{left:12%}.r-right{right:12%}.actionbar{height:48px;min-height:48px}.actions button{min-width:48px;padding:7px 10px}.reaction-card{padding:5px 7px}.mj{width:clamp(22px,4.75vw,32px);height:clamp(31px,6.6vw,44px);font-size:clamp(10px,2.2vw,15px)}
+}
+
+/* ---------- Portrait gameplay: prompt rotation ---------- */
+@media(max-width:760px) and (orientation:portrait){
+  .online-shell .game-layout,.online-shell .actionbar,.online-shell .mobile-sheet,.online-shell .sheet-scrim{visibility:hidden}.rotate-hint{display:grid}.online-shell header{position:relative;z-index:45}.connection-toast{z-index:81}.seat-list{grid-template-columns:1fr}.invite-actions{grid-template-columns:1fr 1fr}.lobby-actions>*{flex:1}.start-card,.lobby-card{border-radius:20px;padding:20px}.start-wrap,.lobby-wrap{padding:12px}
+}
+
+/* ==========================================================
+   Stage 3.3 — mobile game feel / graphic tile faces
+   ========================================================== */
+.mj{overflow:hidden;isolation:isolate;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+.tile-face{width:100%;height:100%;display:grid;place-items:center;line-height:1;pointer-events:none;padding:4% 3% 5%}
+.tile-face svg{width:100%;height:100%;display:block;overflow:visible}.tile-face text{font-family:"Noto Serif TC","Source Han Serif TC","Songti TC","PMingLiU",serif;font-weight:900}
+.mj.small .tile-face{padding:3%}
+
+/* draw / discard / reaction motion */
+.mj.drawn{animation:drawTile .24s cubic-bezier(.2,.9,.25,1.2);box-shadow:0 0 0 2px #f7d46766,0 4px 0 #17733b,0 7px 12px #0005}
+.mj.pending-discard{pointer-events:none;animation:throwTile .16s ease-in forwards}
+.mj.latest{animation:discardLand .32s cubic-bezier(.2,.95,.35,1.2),latestGlow 1.25s .32s ease-in-out infinite}
+.reaction-card{animation:reactionUp .18s ease-out}.actions button:active{transform:translateY(2px) scale(.97)}
+.call-flash{position:fixed;left:50%;top:45%;z-index:66;transform:translate(-50%,-50%);width:86px;height:86px;border-radius:50%;display:grid;place-items:center;background:#fff4d8e8;color:#16392e;border:4px solid #d3a94b;box-shadow:0 16px 55px #0008,0 0 0 10px #ffffff16;font:1000 42px/1 "Noto Serif TC",serif;animation:callBurst .78s cubic-bezier(.15,.85,.22,1) forwards;pointer-events:none}.call-flash.win{background:#c8463ef2;border-color:#ffd76a;color:#fff;font-size:45px}
+.your-turn{animation:turnPulse 1.15s ease-in-out infinite}.you.active .hand{filter:drop-shadow(0 0 7px #ffd36d55)}
+@keyframes drawTile{0%{transform:translateY(-24px) rotate(4deg);opacity:.2}100%{transform:translateY(0);opacity:1}}
+@keyframes throwTile{0%{transform:translateY(-10px) scale(1)}100%{transform:translateY(-42px) scale(.76);opacity:.1}}
+@keyframes discardLand{0%{transform:translateY(-14px) scale(1.18);opacity:.2}100%{transform:translateY(-2px) scale(1);opacity:1}}
+@keyframes latestGlow{50%{outline-color:#fff5b6;filter:brightness(1.08)}}
+@keyframes reactionUp{0%{transform:translateY(12px) scale(.96);opacity:0}100%{transform:none;opacity:1}}
+@keyframes callBurst{0%{transform:translate(-50%,-50%) scale(.35);opacity:0}28%{transform:translate(-50%,-50%) scale(1.18);opacity:1}70%{transform:translate(-50%,-50%) scale(1)}100%{transform:translate(-50%,-62%) scale(.9);opacity:0}}
+@keyframes turnPulse{50%{text-shadow:0 0 11px #ffd96e}}
+
+/* Stage 3.3 controls */
+.info-actions{grid-template-columns:repeat(3,1fr)}
+.invite-actions{grid-template-columns:1fr 1fr}.invite-actions button:first-child{grid-column:auto}
+.feedback-note{font-size:10px;color:#71827b;margin-top:6px}
+@media(max-width:900px) and (orientation:landscape){
+  .mj{border-radius:4px}.tile-face{padding:3%}.call-flash{width:70px;height:70px;font-size:34px;top:42%}.call-flash.win{font-size:37px}
+}
+@media(prefers-reduced-motion:reduce){.mj,.call-flash,.reaction-card,.your-turn{animation:none!important;transition:none!important}}
+/* 離開牌局 */
+.mobile-sheet .leave-btn,.side-panel .leave-btn{background:#fbe9e6!important;color:#a3271d!important;border:1px solid #e7b3ab!important}
+
+/* ===== 牌桌 Grid 版面：每個區塊各佔一格，牌河／副露／手牌／玩家資訊不會互相覆蓋 =====
+   top    : 對家（資訊＋牌背＋副露一列）
+   middle : 上家 | 上家牌河 | 對家牌河 / 中央 / 自己牌河 | 下家牌河 | 下家
+   bottom : 自己（資訊＋副露＋手牌一列） */
+.online-shell .table{
+  --rv:18px;  /* 牌河牌寬 */
+  --op:15px;  /* 對手副露牌寬 */
+  --bk:10px;  /* 對手牌背寬 */
+  --hd:clamp(26px,calc((100vw - 150px) / 17.6),46px); /* 自己手牌寬 */
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto minmax(0,1fr) auto;
+  grid-template-rows:auto minmax(0,1fr) auto minmax(0,1fr) auto;
+  grid-template-areas:
+    "top   top   top    top    top"
+    "left  rleft rtop   rright right"
+    "left  rleft center rright right"
+    "left  rleft rbot   rright right"
+    "you   you   you    you    you";
+  gap:4px 8px;padding:6px 12px 4px;
+}
+.online-shell .table::before,.online-shell .table>.wall,.online-shell .table .center::before{display:none}
+.online-shell .table>.opp,.online-shell .table>.you,.online-shell .table>.river,.online-shell .table>.center{position:relative;inset:auto;transform:none;margin:0;width:auto;height:auto}
+
+/* 對家 */
+.online-shell .table>.opp.top{grid-area:top;justify-self:center;display:flex;align-items:center;gap:8px}
+.online-shell .opp.top .backs,.online-shell .opp.top .melds{margin:0;max-width:none;flex-wrap:nowrap}
+.online-shell .opp .backs .mj{width:var(--bk);height:calc(var(--bk) * 1.4);border-radius:2px}
+/* 上家／下家：資訊在上，牌背直列＋副露直列 */
+.online-shell .table>.opp.left,.online-shell .table>.opp.right{align-self:center;display:grid;gap:4px 6px;align-items:start}
+.online-shell .table>.opp.left{grid-area:left;grid-template-areas:"meta meta" "backs melds" "note note";justify-items:start}
+.online-shell .table>.opp.right{grid-area:right;grid-template-areas:"meta meta" "melds backs" "note note";justify-items:end}
+.online-shell .opp.left .player-meta,.online-shell .opp.right .player-meta{grid-area:meta}
+.online-shell .opp.left .backs,.online-shell .opp.right .backs{grid-area:backs;position:static;transform:none;flex-direction:column;gap:0;margin:0}
+.online-shell .opp.left .backs .mj,.online-shell .opp.right .backs .mj{width:calc(var(--bk) * 1.4);height:var(--bk);margin-top:-1px}
+.online-shell .opp.left .melds,.online-shell .opp.right .melds{grid-area:melds;position:static;flex-direction:column;gap:3px;max-width:none;margin:0}
+.online-shell .opp.left .melds{align-items:flex-start}
+.online-shell .opp.right .melds{align-items:flex-end}
+.online-shell .opp .flower-note{grid-area:note;margin:0}
+.online-shell .opp .melds .mj.small{width:var(--op);height:calc(var(--op) * 1.38)}
+
+/* 牌河：對家／自己 12 張一列，上下家 4 張一列，都不旋轉 */
+.online-shell .table>.river{gap:2px;align-content:start}
+.online-shell .river .mj.small{width:var(--rv);height:calc(var(--rv) * 1.38)}
+.online-shell .table>.r-top{grid-area:rtop;align-self:end;justify-self:center;grid-template-columns:repeat(12,var(--rv))}
+.online-shell .table>.r-bottom{grid-area:rbot;align-self:start;justify-self:center;grid-template-columns:repeat(12,var(--rv))}
+.online-shell .table>.r-left{grid-area:rleft;align-self:center;justify-self:end;grid-template-columns:repeat(4,var(--rv))}
+.online-shell .table>.r-right{grid-area:rright;align-self:center;justify-self:start;grid-template-columns:repeat(4,var(--rv))}
+.online-shell .r-left .mj,.online-shell .r-right .mj{transform:none;margin:0}
+.online-shell .r-left .mj.latest,.online-shell .r-right .mj.latest{transform:translateY(-2px)}
+
+/* 中央 */
+.online-shell .table>.center{grid-area:center;justify-self:center;align-self:center;min-width:78px;padding:4px 10px}
+
+/* 「最新棄牌」改放在中央框內；手機上隱藏（牌河已高亮最新那張） */
+.online-shell .center .last{position:static;transform:none;margin-top:4px;display:none}
+@media(min-height:600px){.online-shell .center .last{display:block}}
+
+/* 自己：資訊＋副露＋手牌同一列 */
+.online-shell .table>.you{grid-area:you;display:flex;align-items:flex-end;justify-content:center;gap:8px}
+.online-shell .you .player-meta{align-self:center;flex-wrap:wrap;justify-content:center;max-width:104px;flex:0 0 auto}
+.online-shell .you .melds{margin:0;min-height:0;gap:3px;flex:0 0 auto}
+.online-shell .you .melds .mj.small{width:calc(var(--hd) * .72);height:calc(var(--hd) * .72 * 1.38)}
+.online-shell .you .hand{margin:0;flex:0 0 auto}
+.online-shell .you .hand .mj{width:var(--hd);height:calc(var(--hd) * 1.38)}
+.online-shell .you .flower-note{display:none;white-space:nowrap}
+
+/* 底部只留安全區，不再空一條動作列；連線正常時不顯示「已連線」 */
+.online-shell .actionbar{height:calc(8px + var(--safe-bottom));min-height:0;background:none}
+.online-shell .connection-toast.ok{display:none}
+
+/* 平板橫向 */
+@media(min-width:901px) and (max-width:1119px) and (orientation:landscape){
+  .online-shell .table{--rv:22px;--op:18px;--bk:12px}
+}
+/* 桌機 */
+@media(min-width:1120px){
+  .online-shell .table{--rv:28px;--op:24px;--bk:18px;--hd:clamp(34px,calc((100vw - 252px - 240px) / 17.6),54px);gap:8px 16px;padding:18px 28px 12px}
+  .online-shell .you .player-meta{max-width:none}
+  .online-shell .you .flower-note{display:block;align-self:center}
+}
+
+/* ===== 手機橫向：左右避開瀏海／動態島、上下家名字直排、海底放大 ===== */
+:root{--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px);--safe-x:max(var(--safe-left),var(--safe-right),14px)}
+/* 上下家：資訊直排（轉 90 度），放在牌背旁邊 */
+.online-shell .table>.opp.left{grid-template-areas:"meta backs melds" "note note note";align-items:center}
+.online-shell .table>.opp.right{grid-template-areas:"melds backs meta" "note note note";align-items:center}
+.online-shell .opp.left .player-meta,.online-shell .opp.right .player-meta{writing-mode:vertical-rl;padding:5px 3px}
+.online-shell .opp.left .player-name,.online-shell .opp.right .player-name{max-width:none;max-height:72px}
+@media(max-width:1119px) and (orientation:landscape){
+  .online-shell header{padding-left:calc(8px + var(--safe-left));padding-right:calc(8px + var(--safe-right))}
+  /* 左右對稱內縮，中央維持置中；手牌列不受影響（動態島只在畫面中段） */
+  .online-shell .table{--rv:21px;--op:14px;--bk:9px;padding:4px calc(8px + var(--safe-x)) 2px;gap:3px 6px}
+  .online-shell .table>.you{margin:0 calc(-1 * var(--safe-x))}
+  .online-shell .hand-actions{right:var(--safe-x)}
+  .online-shell .table>.center{min-width:70px;padding:3px 8px}
+  .center{width:72px;height:66px;border-width:3px}.center .round{font-size:11px}.center strong{font-size:20px;margin:2px 0}
+  .player-meta{padding:2px 4px}.wind{width:18px;height:18px;font-size:9px}
+}
+@media(max-width:900px) and (max-height:520px) and (orientation:landscape){
+  .online-shell header{height:32px;min-height:32px}
+}
+
+/* ===== 聽牌提示（浮在自己手牌左上方） ===== */
+.tenpai-hint{position:absolute;left:0;bottom:100%;margin-bottom:6px;z-index:29;display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:12px;background:#082b21e6;border:1px solid #f0ca6355;box-shadow:0 6px 18px #0006;pointer-events:none;animation:reactionUp .18s ease-out}
+.tenpai-hint>b{color:#ffd76a;font-size:12px;font-weight:950;white-space:nowrap}
+.tenpai-note{font-size:10px;color:#d9e8e2;white-space:nowrap}
+.tenpai-tiles{display:flex;gap:4px;flex-wrap:wrap;max-width:46vw}
+.tenpai-wait{position:relative;display:inline-flex}
+.tenpai-wait .mj.small{width:20px;height:28px}
+.tenpai-wait i{position:absolute;right:-4px;bottom:-3px;min-width:13px;height:13px;padding:0 2px;border-radius:7px;background:#d7aa32;color:#1c3329;font:normal 900 9px/13px system-ui,sans-serif;text-align:center}
+.tenpai-wait.dead{opacity:.45}.tenpai-wait.dead i{background:#8a948f;color:#fff}
+/* 打出後可聽牌的手牌：上緣金色標記 */
+.mj.tenpai-discard::after{content:"";position:absolute;left:18%;right:18%;top:2px;height:3px;border-radius:2px;background:#e9b530;box-shadow:0 0 4px #f5cd56}
+.mj{position:relative}
+@media(max-width:1119px) and (orientation:landscape){.tenpai-hint{left:var(--safe-x)}}
+@media(min-width:1120px){.tenpai-hint>b{font-size:14px}.tenpai-wait .mj.small{width:28px;height:39px}}
+
+/* ===== 吃牌組合按鈕：直接顯示順子 ===== */
+.mj:is(span){display:inline-grid;place-items:center;cursor:default}
+.actions .chow-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 8px 6px}
+.chow-tiles{display:inline-flex;gap:1px}
+.chow-btn .mj.small{width:17px;height:24px;box-shadow:0 1px 0 #17733b}
+.chow-btn .mj.chow-taken{outline:2px solid #ffd557;outline-offset:-1px;transform:translateY(-2px)}
+@media(min-width:1120px){.chow-btn .mj.small{width:24px;height:33px}}
+
+/* 中央框：目前打多少（底 / 台） */
+.center .stakes{margin-top:3px;padding:1px 6px;border-radius:999px;background:#f0ca6322;border:1px solid #f0ca6366;color:#ffd76a;font-size:9px;font-weight:900;white-space:nowrap;font-variant-numeric:tabular-nums}
+@media(min-width:1120px){.center .stakes{font-size:12px;padding:2px 8px}}
+/* 抓風 */
+.wind-card{text-align:center}.wind-card .lead b{margin-left:8px;color:#176044}
+.wind-row{display:flex;justify-content:center;gap:14px;margin:18px 0 10px}
+.wind-slot{display:grid;justify-items:center;gap:6px}.wind-slot small{font-size:12px;font-weight:800;color:#5f716a;max-width:72px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.wind-slot.mine small{color:#176044}
+.wind-row .mj{width:52px;height:72px;font-size:24px}
+.wind-row .mj.wind-pick:not(:disabled){cursor:pointer;transition:transform .15s}.wind-row .mj.wind-pick:not(:disabled):hover{transform:translateY(-6px)}
+.wind-slot.mine .mj{outline:3px solid #f0ca63}
+.wind-status{font-weight:800;color:#19352c}
+/* 建房時選 AI 人數 */
+.ai-picker{display:grid;gap:7px;margin-top:14px;text-align:left}.ai-picker small{color:#5f716a;font-size:12px}
+.ai-options{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.start-card .ai-options button.active{background:#176044;color:#fff;border-color:#176044}
+.wind-order{display:flex;justify-content:center;flex-wrap:wrap;gap:6px;list-style:none;padding:0;margin:0 0 4px}.wind-order li{font-size:12px;font-weight:800;padding:5px 9px;border-radius:999px;background:#eef3f0;color:#577068}.wind-order li.current{background:#176044;color:#fff}
+/* 宣告聽牌 */
+.ready-badge{font-style:normal;font-size:11px;font-weight:950;padding:1px 6px;border-radius:999px;background:#c84b3d;color:#fff}
+/* 語言切換 */
+.topbar-right{display:inline-flex;gap:6px;align-items:center}.lang-btn{min-width:46px}
+/* 花牌：擺在名字上方，一列最多四張 */
+.online-shell .meta-stack{display:flex;flex-direction:column;align-items:center;gap:3px}
+.online-shell .flowers-row{display:grid;grid-template-columns:repeat(4,auto);gap:1px;justify-content:center;margin:0}
+.online-shell .opp .flowers-row .mj.small{width:var(--op);height:calc(var(--op) * 1.38)}
+.online-shell .opp.left .meta-stack,.online-shell .opp.right .meta-stack{grid-area:meta}
+.online-shell .opp.left .meta-stack{align-items:flex-start}.online-shell .opp.left .flowers-row{justify-content:start}
+.online-shell .opp.right .meta-stack{align-items:flex-end}.online-shell .opp.right .flowers-row{justify-content:end}
+.online-shell .you .meta-stack{align-self:center;flex:0 0 auto}
+.online-shell .you .flowers-row{display:grid}
+.online-shell .you .flowers-row .mj.small{width:calc(var(--hd) * .5);height:calc(var(--hd) * .5 * 1.38)}
+/* 胡牌 cut-in 動畫（原創 Q 版角色 + 集中線） */
+.win-cutin{position:fixed;inset:0;z-index:95;display:flex;flex-direction:column;justify-content:center;gap:18px;pointer-events:none;overflow:hidden;background:radial-gradient(circle,#0000 30%,#000a 100%);animation:cutinFade 3.2s ease forwards}
+.win-cutin::before{content:"";position:absolute;inset:-50%;background:repeating-conic-gradient(from 0deg,#ffffff38 0deg 1.6deg,#0000 1.6deg 7deg);animation:speedSpin 2.6s linear infinite;mask:radial-gradient(circle,#0000 22%,#000 60%);-webkit-mask:radial-gradient(circle,#0000 22%,#000 60%)}
+.cutin-band{position:relative;margin-left:-10vw;width:120vw;display:flex;align-items:center;gap:clamp(10px,3vw,32px);padding:clamp(6px,1.6vw,16px) 0 clamp(6px,1.6vw,16px) 14vw;background:linear-gradient(100deg,#fff0 0 4%,var(--band) 4% 70%,#fff0 70.2%),linear-gradient(100deg,#0000 0 3%,#ffd54f 3% 4%,#0000 4%);transform:skewY(-6deg) translateX(-120%);box-shadow:0 10px 0 #0006;animation:cutinIn .38s cubic-bezier(.2,1.4,.4,1) var(--delay) forwards,cutinOut .3s ease-in calc(2.65s + var(--delay)) forwards}
+.cutin-face{width:clamp(84px,20vw,190px);flex:0 0 auto;transform:skewY(6deg);filter:drop-shadow(4px 6px 0 #0007);animation:faceBounce .5s cubic-bezier(.3,1.8,.5,1) calc(.3s + var(--delay)) both}
+.cutin-face svg{display:block;width:100%;height:auto}
+.cutin-copy{transform:skewY(6deg);color:#fff;line-height:1}
+.cutin-word{font-size:clamp(46px,11vw,128px);font-weight:950;letter-spacing:.04em;-webkit-text-stroke:3px #1a1a1a;paint-order:stroke fill;text-shadow:6px 6px 0 #1a1a1a;font-style:italic;animation:wordPunch .45s cubic-bezier(.2,1.6,.4,1) calc(.22s + var(--delay)) both}
+.cutin-name{margin-top:6px;font-size:clamp(16px,3.4vw,30px);font-weight:900;text-shadow:2px 2px 0 #1a1a1a}
+@keyframes cutinIn{to{transform:skewY(-6deg) translateX(0)}}
+@keyframes cutinOut{from{transform:skewY(-6deg) translateX(0)}to{transform:skewY(-6deg) translateX(120%)}}
+@keyframes faceBounce{from{transform:skewY(6deg) scale(.2) rotate(-25deg)}to{transform:skewY(6deg) scale(1) rotate(0)}}
+@keyframes wordPunch{from{transform:scale(2.6);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes speedSpin{to{transform:rotate(360deg)}}
+@keyframes cutinFade{0%{opacity:0}8%{opacity:1}88%{opacity:1}100%{opacity:0}}
+@media(prefers-reduced-motion:reduce){.win-cutin,.win-cutin::before,.cutin-band,.cutin-face,.cutin-word{animation:none!important}.cutin-band{transform:skewY(-6deg)}}
+/* 頭像 */
+.avatar-picker{display:grid;gap:7px;margin-top:14px;text-align:left}
+.avatar-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.start-card .avatar-opt,.lobby-card .avatar-opt{position:relative;padding:4px!important;border-radius:16px;border:2px solid #d6ddd8;background:#fff;aspect-ratio:1;display:grid;place-items:center}
+.avatar-opt svg{width:100%;height:auto;display:block}
+.start-card .avatar-opt.active,.lobby-card .avatar-opt.active{border-color:#176044;box-shadow:0 0 0 3px #17604433;background:#eef7f1}
+.avatar-opt:disabled{opacity:.38;cursor:not-allowed;filter:grayscale(.8)}
+.avatar-opt small{position:absolute;left:2px;right:2px;bottom:2px;font-size:10px;background:#000a;color:#fff;border-radius:6px;padding:1px 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seat-avatar{width:36px;height:36px;border-radius:50%;overflow:hidden;background:#fff;flex:0 0 auto;display:grid;place-items:center;font-weight:900;box-shadow:0 0 0 2px #17604433}
+.seat-avatar svg,.player-avatar svg{width:100%;height:100%;display:block}
+.player-avatar.has-face{padding:0;overflow:hidden;background:#fff}
+/* 胡牌 cut-in：輸家頭像 */
+.cutin-losers{position:relative;display:flex;justify-content:center;gap:clamp(12px,4vw,36px);opacity:0;animation:losersIn .35s ease-out var(--delay) forwards}
+.cutin-loser{display:grid;justify-items:center;gap:4px;color:#fff;font-weight:900;font-size:clamp(12px,2.4vw,18px);text-shadow:2px 2px 0 #1a1a1a}
+.cutin-loser-face{width:clamp(60px,13vw,120px);border-radius:50%;background:#dfe9f5;box-shadow:0 0 0 4px #1a1a1a,0 6px 0 #0007;overflow:hidden;animation:loserShake .35s ease-in-out calc(var(--delay) + .3s) 3}
+.cutin-loser-face svg{display:block;width:100%;height:auto}
+@keyframes losersIn{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
+@keyframes loserShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px) rotate(-4deg)}75%{transform:translateX(6px) rotate(4deg)}}
+@media(prefers-reduced-motion:reduce){.cutin-losers,.cutin-loser-face{animation:none!important;opacity:1}}
+/* 重畫時不重播動畫：聽牌提示內容沒變、剛摸的牌已經播過 */
+.tenpai-hint.still{animation:none}
+.mj.drawn.settled{animation:none}
+/* 電腦版牌桌放大：填滿側邊欄以外的空間，牌也跟著放大 */
+@media(min-width:1120px){
+  .online-shell .table-area{padding:6px}
+  .online-shell .table{width:100%;max-width:none;height:calc(100vh - 78px);max-height:none;min-height:600px;
+    --rv:34px;--op:30px;--bk:22px;--hd:clamp(40px,calc((100vw - 252px - 190px) / 17.6),68px);gap:10px 18px;padding:16px 28px 10px}
+  .online-shell .you .flowers-row .mj.small{width:calc(var(--hd) * .45);height:calc(var(--hd) * .45 * 1.38)}
+}
+@media(min-width:1600px){
+  .online-shell .table{--rv:40px;--op:34px;--bk:24px;--hd:clamp(48px,calc((100vw - 252px - 190px) / 17.6),78px)}
+  .tenpai-wait .mj.small,.chow-btn .mj.small{width:32px;height:44px}
+}
+.lobby-card .leave-btn,.wind-card .leave-btn{background:#fbe9e6!important;color:#a3271d!important;border:1px solid #e7b3ab!important}
+.wind-card .leave-btn{margin-top:10px}
+/* 電腦版：海底（牌河）與另外三家的牌依螢幕大小等比例放大，並以螢幕高度限制上限 */
+@media(min-width:1120px){
+  .online-shell .table{
+    --rv:clamp(34px,min(2.6vw,4.2vh),58px);
+    --bk:clamp(22px,min(1.6vw,2.7vh),36px);
+    --op:clamp(28px,min(2vw,3.4vh),46px);
+  }
+}
+/* 反應選單只播一次彈出動畫 */
+.reaction-card.still{animation:none}
+/* 電腦版：吃／碰／槓／胡選單與自己回合的按鈕放大 */
+@media(min-width:1120px){
+  .online-shell .reaction-card{padding:12px 16px;border-radius:18px}
+  .online-shell .reaction-head{font-size:16px;margin-bottom:8px}
+  .online-shell .hand-actions .actions{gap:10px}
+  .online-shell .hand-actions .actions button{font-size:clamp(18px,1.3vw,24px);padding:12px 22px;min-height:clamp(56px,4vw,72px);border-radius:16px}
+  .online-shell .actions .chow-btn{gap:10px;padding:8px 14px 10px}
+  .online-shell .chow-btn .mj.small{width:clamp(30px,2.3vw,48px);height:calc(clamp(30px,2.3vw,48px) * 1.38);border-radius:5px}
+}
+/* 規則連結 */
+.rules-link{text-decoration:none;display:inline-flex;align-items:center;border-radius:13px}
+.side-panel .rules-btn,.mobile-sheet .rules-btn{display:block;text-align:center;text-decoration:none;padding:12px 16px;border-radius:13px;border:1px solid #bdc9c1;background:#fff;color:#17352c;font-weight:850}
+.side-panel .rules-btn{margin:0 0 8px}

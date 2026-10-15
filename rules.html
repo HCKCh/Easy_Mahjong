@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0b5e45" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+  <title>麻將規則 · 東西南北麻將托兒所</title>
+  <style>
+    :root{--bg:#0b332a;--card:#faf7ee;--ink:#18342b;--muted:#5f716a;--line:#dfe4e0;--accent:#176044;--gold:#c99a2e;--soft:#eef3f0}
+    *{box-sizing:border-box}
+    body{margin:0;background:radial-gradient(circle at 50% 0,#24684f,#0b332a 45%,#071e19);color:var(--ink);font-family:Inter,"Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;line-height:1.7}
+    .wrap{width:min(920px,100%);margin:0 auto;padding:16px}
+    .top{display:flex;justify-content:space-between;align-items:center;gap:10px;color:#f5ecdb;padding:6px 2px 14px}
+    .top a{color:#f5ecdb;text-decoration:none;font-weight:800}
+    .lang-btn{border:0;border-radius:999px;padding:8px 14px;background:#e7eee9;color:#265143;font-weight:800;cursor:pointer}
+    article{background:var(--card);border-radius:24px;padding:clamp(18px,4vw,40px);box-shadow:0 30px 80px #0006}
+    h1{font-size:clamp(28px,6vw,44px);margin:4px 0 6px;line-height:1.2}
+    .kicker{font-size:12px;letter-spacing:.15em;font-weight:800;color:#7b6840}
+    .lead{color:var(--muted);font-size:17px;margin:0 0 8px}
+    nav.toc{background:var(--soft);border-radius:16px;padding:12px 16px;margin:18px 0 8px;font-size:14px}
+    nav.toc ol{margin:6px 0 0;padding-left:20px;columns:2;column-gap:28px}
+    nav.toc a{color:var(--accent);text-decoration:none;font-weight:700}
+    h2{font-size:clamp(21px,4vw,27px);margin:34px 0 8px;padding-top:6px;border-top:1px solid var(--line)}
+    h3{font-size:18px;margin:20px 0 4px}
+    p,li{font-size:16px}
+    .note{background:#fdf3d6;border:1px solid #ebcf7a;border-radius:14px;padding:10px 14px;font-size:14.5px;margin:12px 0}
+    .site{background:#e6f2ec;border:1px solid #b9d9c8;border-radius:14px;padding:10px 14px;font-size:14.5px;margin:12px 0}
+    .note b,.site b{display:block;margin-bottom:2px}
+    table{width:100%;border-collapse:collapse;margin:10px 0;font-size:14.5px;background:#fff;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+    th,td{padding:8px 10px;border-bottom:1px solid #eef1ef;text-align:left;vertical-align:top}
+    th{background:var(--soft);color:#577068;font-size:13px}
+    td.tai{white-space:nowrap;font-weight:900;color:var(--accent);text-align:right;width:56px}
+    tr:last-child td{border-bottom:0}
+    .tiles{display:inline-flex;flex-wrap:wrap;gap:3px;vertical-align:middle;margin:2px 0}
+    .tiles .gap{width:10px}
+    .tile{display:inline-grid;place-items:center;width:30px;height:41px;border-radius:5px;background:linear-gradient(#fffefa,#f8f4e6 74%,#e8e0c8);box-shadow:0 2px 0 #1d8b47,0 3px 4px #0003}
+    .tile svg{width:100%;height:100%;display:block}
+    .tiles.big .tile{width:38px;height:52px}
+    .row{margin:8px 0}
+    .row small{display:block;color:var(--muted);font-size:13px}
+    .example{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:10px 0}
+    code{background:var(--soft);padding:1px 6px;border-radius:6px}
+    .play{display:inline-block;margin-top:24px;background:var(--accent);color:#fff;text-decoration:none;font-weight:900;padding:14px 22px;border-radius:14px}
+    footer{color:#cfe3d9;font-size:12.5px;text-align:center;padding:18px 8px 30px}
+    footer a{color:#f0ca63}
+    [data-lang]{display:none}
+    html[lang="zh-Hant"] [data-lang="zh"],html[lang="en"] [data-lang="en"]{display:block}
+    @media(max-width:620px){nav.toc ol{columns:1}.tile{width:26px;height:36px}.tiles.big .tile{width:30px;height:41px}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="./" data-i="home"></a><button class="lang-btn" id="lang-btn" type="button"></button></div>
+
+<!-- ======================= 中文 ======================= -->
+<article data-lang="zh">
+  <div class="kicker">HOW TO PLAY</div>
+  <h1>台灣 16 張麻將規則</h1>
+  <p class="lead">從零開始的完整入門：認識牌、怎麼胡、怎麼吃碰槓、怎麼算台與算錢。綠色框是「本站的實際做法」，黃色框是「各地常見的不同玩法」。</p>
+  <nav class="toc"><b>目錄</b><ol>
+    <li><a href="#zh-intro">台灣麻將是什麼</a></li><li><a href="#zh-tiles">牌組（144 張）</a></li>
+    <li><a href="#zh-goal">胡牌的目標</a></li><li><a href="#zh-setup">開局：抓風、發牌、補花</a></li>
+    <li><a href="#zh-turn">輪流摸牌與打牌</a></li><li><a href="#zh-calls">吃、碰、槓</a></li>
+    <li><a href="#zh-priority">搶牌的優先順序</a></li><li><a href="#zh-win">胡牌：放槍與自摸</a></li>
+    <li><a href="#zh-ready">聽牌、宣告聽牌、過水</a></li><li><a href="#zh-draw">流局</a></li>
+    <li><a href="#zh-dealer">莊家、連莊與圈風</a></li><li><a href="#zh-pay">算錢：底與台</a></li>
+    <li><a href="#zh-tai">台數表</a></li><li><a href="#zh-vary">各地差異與本站未計的台</a></li>
+    <li><a href="#zh-terms">常用術語</a></li>
+  </ol></nav>
+
+  <h2 id="zh-intro">1. 台灣麻將是什麼</h2>
+  <p>台灣麻將是四人遊戲，每人手上 16 張牌，比廣東、日本麻將的 13 張多。玩家輪流摸牌、打牌，誰先把手牌湊成規定的組合就「胡牌」，然後依照牌型的「台數」向其他玩家收錢。台灣麻將的特色是有 8 張花牌、可以「一路吃」上家的牌，而且就算沒有任何台也能胡（俗稱屁胡）。</p>
+
+  <h2 id="zh-tiles">2. 牌組（144 張）</h2>
+  <div class="row"><b>萬子</b>：一萬～九萬，每種 4 張，共 36 張<br><span class="tiles" data-t="1m 2m 3m 4m 5m 6m 7m 8m 9m"></span></div>
+  <div class="row"><b>筒子</b>：一筒～九筒，每種 4 張，共 36 張<br><span class="tiles" data-t="1p 2p 3p 4p 5p 6p 7p 8p 9p"></span></div>
+  <div class="row"><b>索子（條子）</b>：一索～九索，每種 4 張，共 36 張<br><span class="tiles" data-t="1s 2s 3s 4s 5s 6s 7s 8s 9s"></span></div>
+  <div class="row"><b>風牌</b>：東、南、西、北，每種 4 張，共 16 張<br><span class="tiles" data-t="E S W N"></span></div>
+  <div class="row"><b>三元牌</b>：紅中、青發、白板，每種 4 張，共 12 張<br><span class="tiles" data-t="C F P"></span></div>
+  <div class="row"><b>花牌</b>：春夏秋冬、梅蘭竹菊，各 1 張，共 8 張<br><span class="tiles" data-t="q1 q2 q3 q4 _ h1 h2 h3 h4"></span><small>花牌不能用來組牌，摸到就亮出來放在旁邊，再補一張。花牌可以加台（見「正花」）。</small></div>
+  <p>萬、筒、索合稱「數牌」，風牌與三元牌合稱「字牌」。</p>
+
+  <h2 id="zh-goal">3. 胡牌的目標</h2>
+  <p>胡牌時手上要有 <b>17 張</b>，組成 <b>5 組面子 + 1 組對子（眼睛）</b>。</p>
+  <ul>
+    <li><b>順子</b>：同一種數牌、連續三張，例如 <span class="tiles" data-t="3p 4p 5p"></span>。字牌不能組順子。</li>
+    <li><b>刻子（坎）</b>：三張一樣的牌，例如 <span class="tiles" data-t="W W W"></span></li>
+    <li><b>槓子</b>：四張一樣的牌，算一組面子，例如 <span class="tiles" data-t="7s 7s 7s 7s"></span></li>
+    <li><b>對子（眼睛）</b>：兩張一樣的牌，整副牌只能有一對，例如 <span class="tiles" data-t="C C"></span></li>
+  </ul>
+  <div class="example"><b>胡牌範例</b>（5 組面子 + 1 對）<br>
+    <span class="tiles big" data-t="1m 2m 3m _ 4m 5m 6m _ 2p 3p 4p _ 7s 7s 7s _ N N N _ C C"></span></div>
+  <p>吃、碰、槓亮出來的牌也算在 5 組面子裡，所以手上剩下的牌會跟著變少。花牌不算在 17 張裡。</p>
+
+  <h2 id="zh-setup">4. 開局：抓風、發牌、補花</h2>
+  <h3>抓風定座位</h3>
+  <p>傳統上把東南西北四張風牌蓋起來洗勻，每人摸一張，摸到哪個風就坐哪個位置，摸到「東」的人是第一任莊家。</p>
+  <div class="site"><b>本站做法</b>依進房順序（大廳 1～4 號）輪流翻牌。輪到你時有 15 秒，沒翻系統會幫你翻。四人都翻完才會發牌。</div>
+  <h3>發牌</h3>
+  <p>每人拿 16 張，莊家多拿 1 張共 17 張，由莊家先打第一張牌。牌牆最後 16 張保留為「王牌」，專門用來補花與槓後補牌。</p>
+  <div class="note"><b>常見做法</b>實體麻將會先擲骰子決定從哪裡開門、每次抓 4 張，本站由伺服器直接洗牌發牌，結果等同。</div>
+  <h3>補花</h3>
+  <p>開局時手上的花牌要全部亮出來，從王牌補同樣張數；補到花再繼續補。遊戲中摸到花也一樣立刻亮出並補牌。</p>
+
+  <h2 id="zh-turn">5. 輪流摸牌與打牌</h2>
+  <p>順序是 <b>東 → 南 → 西 → 北</b>（逆時針）。輪到你時先摸一張，手上變 17 張，再打出一張不要的牌，回到 16 張。打出的牌放在桌子中央，稱為「海底」或「河」。</p>
+  <div class="site"><b>本站操作</b>點一下選牌、再點一下打出。剛摸的牌會放在最右邊。</div>
+
+  <h2 id="zh-calls">6. 吃、碰、槓</h2>
+  <p>別人打出的牌，你可以「拿走」來組成面子，但要把那組牌亮在桌上（副露）。</p>
+  <ul>
+    <li><b>吃</b>：只能吃<b>上家</b>（坐你左手邊、在你前一家）打的數牌，組成順子。例如上家打 <span class="tiles" data-t="5s"></span>，你有 <span class="tiles" data-t="4s 6s"></span> 就可以吃。</li>
+    <li><b>碰</b>：任何一家打出的牌，你手上有兩張一樣的就可以碰，組成刻子。碰完由你打牌，中間的玩家會被跳過。</li>
+    <li><b>明槓</b>：手上有三張一樣，別人又打出第四張，可以槓。</li>
+    <li><b>暗槓</b>：自己摸齊四張一樣的牌，可以宣告暗槓。暗槓不算破壞門清。</li>
+    <li><b>加槓</b>：已經碰出的刻子，又自己摸到第四張，可以加上去變成槓。</li>
+  </ul>
+  <p>每次槓完都要從王牌<b>補一張</b>，再打牌。</p>
+  <p><b>搶槓</b>：有人加槓時，如果那張牌正好是你要胡的牌，你可以搶過來胡（搶槓胡）。</p>
+
+  <h2 id="zh-priority">7. 搶牌的優先順序</h2>
+  <p>同一張牌有好幾個人要時：<b>胡 &gt; 碰／槓 &gt; 吃</b>。</p>
+  <p>兩個人以上都要胡同一張牌時：</p>
+  <ul>
+    <li><b>一炮一響（截胡）</b>：由打牌者的下家開始，順序最近的那位胡。</li>
+    <li><b>一炮多響</b>：所有要胡的人都算胡，放槍者分別賠給每一位。</li>
+  </ul>
+  <div class="site"><b>本站做法</b>預設一炮一響。可以吃碰槓胡時畫面會跳出按鈕，有幾秒鐘（預設 8 秒）可以決定，時間到視為「過」。</div>
+
+  <h2 id="zh-win">8. 胡牌：放槍與自摸</h2>
+  <ul>
+    <li><b>放槍（食胡）</b>：別人打出的牌讓你胡了，打那張牌的人「放槍」，由他一個人付錢。</li>
+    <li><b>自摸</b>：自己摸到胡牌的那張，其他三家都要付錢。</li>
+  </ul>
+  <p>台灣麻將<b>沒有最低台數</b>，0 台也可以胡（屁胡），只收「底」。</p>
+
+  <h2 id="zh-ready">9. 聽牌、宣告聽牌、過水</h2>
+  <p><b>聽牌</b>：只差一張就能胡的狀態。你等的那幾種牌叫「聽的牌」。</p>
+  <div class="site"><b>本站：聽牌提示</b>畫面會顯示你聽哪些牌、每種在桌面上還沒出現的張數（只扣掉大家打出的牌與亮出的副露，不扣你自己手裡的牌）。輪到你打牌時，「打了會聽牌」的牌上方會有金色標記。</div>
+  <div class="site"><b>本站：宣告聽牌（+1 台）</b>選到打了會聽的牌時，可以按「聽牌」宣告。宣告後手牌鎖定：不能再吃、碰、槓，每次摸到不能胡的牌系統會自動打出；摸到能胡的牌會停下來讓你決定是否自摸。最後胡牌時多算 1 台「聽牌」。不宣告也可以照常胡，只是沒有這 1 台。</div>
+  <p><b>過水</b>：別人打出你可以胡的牌，你卻選擇不胡，在你自己下一次摸牌之前，就不能再胡別人打出的牌（自摸不受影響）。這是為了防止「等更大的牌才胡」。</p>
+
+  <h2 id="zh-draw">10. 流局</h2>
+  <p>牌牆摸完（只剩王牌）還沒有人胡，就是流局，這一局不算錢。</p>
+
+  <h2 id="zh-dealer">11. 莊家、連莊與圈風</h2>
+  <ul>
+    <li><b>莊家</b>：坐東位、先打牌的人。莊家輸贏都會多算台（見下一節）。</li>
+    <li><b>連莊</b>：莊家胡牌，或是流局，莊家繼續當莊，稱為連莊。</li>
+    <li><b>過莊</b>：其他人胡牌，莊家換給下一家（南家當莊，依此類推）。</li>
+    <li><b>圈風</b>：四個人都當過一次莊算一圈。第一圈是「東風圈」，第二圈是「南風圈」。</li>
+  </ul>
+  <div class="site"><b>本站做法</b>一場打東風圈、南風圈兩圈，南風圈第 4 局結束（且莊家沒有連莊）就整場結束，寫入排行榜。每人起始 1000 點。</div>
+
+  <h2 id="zh-pay">12. 算錢：底與台</h2>
+  <p>開打前先約定「底」與「台」的金額，例如「50／20」代表底 50、每台 20。每一筆付款：</p>
+  <p style="text-align:center;font-size:18px"><b>付款 ＝ 底 ＋ 台數 × 每台金額</b></p>
+  <ul>
+    <li>放槍：放槍的人付一筆給胡牌者。</li>
+    <li>自摸：其他三家各付一筆。</li>
+    <li><b>莊家台</b>：只要胡牌者或付錢的人是莊家，這一筆就多算 <b>1 台</b>；莊家每連莊一次再加 <b>2 台</b>（俗稱「連 N 拉 N」）。也就是莊家台 ＝ 1 ＋ 2 × 連莊次數。</li>
+  </ul>
+  <div class="example"><b>例 1</b>：底 50／台 20。西家放槍給南家，南家這副牌 3 台，莊家是東家（沒參與）。<br>西家付 50 ＋ 3 × 20 ＝ <b>110</b>。</div>
+  <div class="example"><b>例 2</b>：同樣 50／20。東家當莊、已連莊 1 次，自摸 3 台。莊家台 ＝ 1 ＋ 2 × 1 ＝ 3。<br>南、西、北各付 50 ＋ (3 ＋ 3) × 20 ＝ <b>170</b>，東家共收 510。</div>
+
+  <h2 id="zh-tai">13. 台數表</h2>
+  <p>以下是本站實際計算的台型，同一副牌可以同時符合多項，台數相加。</p>
+  <table>
+    <thead><tr><th>台型</th><th>條件</th><th style="text-align:right">台</th></tr></thead>
+    <tbody>
+      <tr><td>自摸</td><td>自己摸到胡牌的牌</td><td class="tai">1</td></tr>
+      <tr><td>門清</td><td>沒有吃、碰、明槓（暗槓可以），胡別人的牌</td><td class="tai">1</td></tr>
+      <tr><td>門清自摸</td><td>門清又自摸（取代上面兩項）</td><td class="tai">3</td></tr>
+      <tr><td>門風</td><td>有自己座位風的刻子（例：南家有南南南）</td><td class="tai">1</td></tr>
+      <tr><td>圈風</td><td>有當圈風的刻子（東風圈的東東東）</td><td class="tai">1</td></tr>
+      <tr><td>三元台</td><td>中、發、白任一種的刻子，每一組 1 台</td><td class="tai">1</td></tr>
+      <tr><td>正花</td><td>拿到自己座位對應的花，每張 1 台（東：春梅、南：夏蘭、西：秋竹、北：冬菊）</td><td class="tai">1</td></tr>
+      <tr><td>聽牌</td><td>本站「宣告聽牌」後胡牌</td><td class="tai">1</td></tr>
+      <tr><td>槓上開花</td><td>槓完補牌直接自摸</td><td class="tai">1</td></tr>
+      <tr><td>搶槓</td><td>搶別人加槓的牌胡</td><td class="tai">1</td></tr>
+      <tr><td>海底撈月</td><td>摸牌牆最後一張自摸</td><td class="tai">1</td></tr>
+      <tr><td>邊張</td><td>只能胡 3 或 7 的邊張（例：12 等 3）</td><td class="tai">1</td></tr>
+      <tr><td>中洞（崁張）</td><td>只能胡中間那張（例：46 等 5）</td><td class="tai">1</td></tr>
+      <tr><td>單吊</td><td>單等一張湊成對子</td><td class="tai">1</td></tr>
+      <tr><td>平胡</td><td>5 組都是順子、沒有字牌、沒有花，胡別人的牌，且不是邊張、中洞、單吊</td><td class="tai">2</td></tr>
+      <tr><td>全求人</td><td>5 組都是吃碰亮出來，最後單吊胡別人的牌</td><td class="tai">2</td></tr>
+      <tr><td>三暗坎</td><td>手上有 3 組自己摸到的刻子</td><td class="tai">2</td></tr>
+      <tr><td>碰碰胡</td><td>5 組都是刻子或槓子</td><td class="tai">4</td></tr>
+      <tr><td>小三元</td><td>中發白其中兩種是刻子、第三種是對子（取代三元台）</td><td class="tai">4</td></tr>
+      <tr><td>湊一色（混一色）</td><td>只有一種數牌加上字牌</td><td class="tai">4</td></tr>
+      <tr><td>四暗坎</td><td>手上有 4 組暗刻</td><td class="tai">5</td></tr>
+      <tr><td>大三元</td><td>中、發、白三組都是刻子</td><td class="tai">8</td></tr>
+      <tr><td>清一色</td><td>全部是同一種數牌，沒有字牌</td><td class="tai">8</td></tr>
+      <tr><td>字一色</td><td>全部是字牌</td><td class="tai">8</td></tr>
+      <tr><td>小四喜</td><td>四種風牌三種是刻子、一種是對子</td><td class="tai">8</td></tr>
+      <tr><td>五暗坎</td><td>手上有 5 組暗刻</td><td class="tai">8</td></tr>
+      <tr><td>八仙過海</td><td>8 張花全部拿到</td><td class="tai">8</td></tr>
+      <tr><td>人胡</td><td>閒家胡莊家打出的第一張牌</td><td class="tai">8</td></tr>
+      <tr><td>地胡</td><td>閒家第一次摸牌就自摸</td><td class="tai">16</td></tr>
+      <tr><td>大四喜</td><td>東南西北四組都是刻子</td><td class="tai">16</td></tr>
+      <tr><td>天胡</td><td>莊家拿到的 17 張一開始就胡</td><td class="tai">24</td></tr>
+    </tbody>
+  </table>
+  <p>天胡、地胡、人胡不再另外加自摸／門清的台。莊家與連莊的台數在算錢時另外加（見上一節）。</p>
+
+  <h2 id="zh-vary">14. 各地差異與本站未計的台</h2>
+  <div class="note"><b>台灣麻將沒有全國統一的規則</b>台數與細節常因地區、家庭而不同，開打前請先跟牌友約好。常見差異：
+    <ul>
+      <li><b>花槓</b>：集齊春夏秋冬或梅蘭竹菊一組，很多人算 2 台；本站目前不計。</li>
+      <li><b>無花</b>：整局沒摸到花加 1 台；本站不計。</li>
+      <li><b>槓上炮</b>、<b>河底撈魚</b>（胡最後一張打出的牌）：有些地方各算 1 台；本站不計。</li>
+      <li><b>七搶一</b>、<b>配牌花胡</b>、<b>地聽</b>：本站台數表中有，但目前不會自動判定。</li>
+      <li><b>高台牌型</b>：大三元、大四喜、天胡等，有些地方算得更高（例如大三元 16 台、天胡 64 台）。</li>
+      <li><b>正花對應</b>：有些英文資料把西家寫成秋菊、北家寫成冬竹；本站依牌面的「梅 1、蘭 2、竹 3、菊 4」，西家是秋竹、北家是冬菊。</li>
+      <li><b>一炮多響</b>、<b>過水</b>、<b>宣告聽牌</b>：各地有些玩、有些不玩。</li>
+    </ul></div>
+
+  <h2 id="zh-terms">15. 常用術語</h2>
+  <table><tbody>
+    <tr><td><b>上家／下家／對家</b></td><td>你前一家（左手邊）／你後一家（右手邊）／坐你對面</td></tr>
+    <tr><td><b>莊／閒</b></td><td>莊家／其他三家</td></tr>
+    <tr><td><b>海底</b></td><td>打出來的牌；也指牌牆最後一張</td></tr>
+    <tr><td><b>王牌</b></td><td>牌牆最後保留的 16 張，用來補花、補槓</td></tr>
+    <tr><td><b>副露</b></td><td>吃碰槓後亮在桌上的牌</td></tr>
+    <tr><td><b>眼睛</b></td><td>胡牌時的那一組對子</td></tr>
+    <tr><td><b>聽牌</b></td><td>只差一張就能胡</td></tr>
+    <tr><td><b>放槍／自摸</b></td><td>打出讓別人胡的牌／自己摸到胡</td></tr>
+    <tr><td><b>屁胡</b></td><td>沒有任何台的胡牌</td></tr>
+    <tr><td><b>連莊／拉莊</b></td><td>莊家繼續當莊／連莊時多算的台</td></tr>
+  </tbody></table>
+
+  <a class="play" href="./online.html">開始打牌 →</a>
+</article>
+
+<!-- ======================= English ======================= -->
+<article data-lang="en">
+  <div class="kicker">HOW TO PLAY</div>
+  <h1>Taiwanese 16-Tile Mahjong Rules</h1>
+  <p class="lead">A complete beginner's guide: the tiles, how to win, calls, scoring (tai) and payments. Green boxes describe how <b>this site</b> plays; yellow boxes describe <b>common variations</b>.</p>
+  <nav class="toc"><b>Contents</b><ol>
+    <li><a href="#en-intro">What is Taiwanese mahjong</a></li><li><a href="#en-tiles">The tiles (144)</a></li>
+    <li><a href="#en-goal">The goal</a></li><li><a href="#en-setup">Setup: seats, deal, flowers</a></li>
+    <li><a href="#en-turn">Taking turns</a></li><li><a href="#en-calls">Chow, pong, kong</a></li>
+    <li><a href="#en-priority">Call priority</a></li><li><a href="#en-win">Winning: discard or self-draw</a></li>
+    <li><a href="#en-ready">Ready, declaring ready, furiten</a></li><li><a href="#en-draw">Draw games</a></li>
+    <li><a href="#en-dealer">Dealer, streaks and rounds</a></li><li><a href="#en-pay">Payments: base and tai</a></li>
+    <li><a href="#en-tai">Tai table</a></li><li><a href="#en-vary">Variations not scored here</a></li>
+    <li><a href="#en-terms">Glossary</a></li>
+  </ol></nav>
+
+  <h2 id="en-intro">1. What is Taiwanese mahjong</h2>
+  <p>Taiwanese mahjong is a four-player game where everyone holds 16 tiles, more than the 13 used in Cantonese or Japanese mahjong. Players take turns drawing and discarding until someone completes a winning hand, then collect payment based on the hand's value in <b>tai</b>. It uses 8 flower tiles, lets you chow from the player before you, and allows a win with zero tai.</p>
+
+  <h2 id="en-tiles">2. The tiles (144)</h2>
+  <div class="row"><b>Characters (萬)</b>: 1–9, four of each, 36 tiles<br><span class="tiles" data-t="1m 2m 3m 4m 5m 6m 7m 8m 9m"></span></div>
+  <div class="row"><b>Dots (筒)</b>: 1–9, four of each, 36 tiles<br><span class="tiles" data-t="1p 2p 3p 4p 5p 6p 7p 8p 9p"></span></div>
+  <div class="row"><b>Bamboo (索)</b>: 1–9, four of each, 36 tiles<br><span class="tiles" data-t="1s 2s 3s 4s 5s 6s 7s 8s 9s"></span></div>
+  <div class="row"><b>Winds</b>: East, South, West, North, four of each, 16 tiles<br><span class="tiles" data-t="E S W N"></span></div>
+  <div class="row"><b>Dragons</b>: Red, Green, White, four of each, 12 tiles<br><span class="tiles" data-t="C F P"></span></div>
+  <div class="row"><b>Flowers</b>: Spring, Summer, Autumn, Winter, Plum, Orchid, Bamboo, Chrysanthemum, one each, 8 tiles<br><span class="tiles" data-t="q1 q2 q3 q4 _ h1 h2 h3 h4"></span><small>Flowers never stay in your hand. Reveal them and draw a replacement. Some flowers earn tai (see "matching flower").</small></div>
+  <p>Characters, dots and bamboo are <b>suits</b>. Winds and dragons are <b>honors</b>.</p>
+
+  <h2 id="en-goal">3. The goal</h2>
+  <p>A winning hand has <b>17 tiles</b>: <b>5 sets + 1 pair</b>.</p>
+  <ul>
+    <li><b>Chow</b>: three consecutive tiles of one suit, e.g. <span class="tiles" data-t="3p 4p 5p"></span>. Honors cannot form chows.</li>
+    <li><b>Pong</b>: three identical tiles, e.g. <span class="tiles" data-t="W W W"></span></li>
+    <li><b>Kong</b>: four identical tiles, counts as one set, e.g. <span class="tiles" data-t="7s 7s 7s 7s"></span></li>
+    <li><b>Pair</b>: two identical tiles; exactly one per hand, e.g. <span class="tiles" data-t="C C"></span></li>
+  </ul>
+  <div class="example"><b>Example winning hand</b> (5 sets + 1 pair)<br>
+    <span class="tiles big" data-t="1m 2m 3m _ 4m 5m 6m _ 2p 3p 4p _ 7s 7s 7s _ N N N _ C C"></span></div>
+  <p>Sets you expose by calling chow, pong or kong count toward the five sets. Flowers are not part of the 17.</p>
+
+  <h2 id="en-setup">4. Setup: seats, deal, flowers</h2>
+  <h3>Drawing for seats</h3>
+  <p>Traditionally the four wind tiles are shuffled face down and each player takes one. The wind you draw is your seat. East is the first dealer.</p>
+  <div class="site"><b>On this site</b>Players flip tiles one at a time in the order they joined (seats 1–4 in the lobby). You have 15 seconds on your turn, then a tile is flipped for you. Tiles are dealt after all four have drawn.</div>
+  <h3>The deal</h3>
+  <p>Everyone gets 16 tiles; the dealer gets 17 and discards first. The last 16 tiles of the wall form the <b>dead wall</b>, used only for flower and kong replacements.</p>
+  <div class="note"><b>Common variation</b>At a real table, dice decide where the wall is broken and tiles are taken four at a time. Here the server shuffles and deals directly, which is equivalent.</div>
+  <h3>Replacing flowers</h3>
+  <p>At the start, reveal every flower in your hand and draw the same number from the dead wall, repeating if you draw another flower. During play, a drawn flower is revealed and replaced immediately.</p>
+
+  <h2 id="en-turn">5. Taking turns</h2>
+  <p>Play goes <b>East → South → West → North</b> (counter-clockwise). On your turn, draw a tile (17 in hand), then discard one (back to 16). Discards go to the middle of the table.</p>
+  <div class="site"><b>On this site</b>Tap a tile to select it, tap again to discard. The tile you just drew is shown on the far right.</div>
+
+  <h2 id="en-calls">6. Chow, pong, kong</h2>
+  <p>You may take another player's discard to complete a set, but that set is then exposed on the table.</p>
+  <ul>
+    <li><b>Chow</b>: only from the player <b>before you</b> (on your left), only suit tiles, to make a run. If they discard <span class="tiles" data-t="5s"></span> and you hold <span class="tiles" data-t="4s 6s"></span>, you can chow.</li>
+    <li><b>Pong</b>: from anyone, if you hold two matching tiles. You then discard, and players in between are skipped.</li>
+    <li><b>Exposed kong</b>: you hold three and someone discards the fourth.</li>
+    <li><b>Concealed kong</b>: you draw all four yourself. It does not break a concealed hand.</li>
+    <li><b>Added kong</b>: you draw the fourth tile of a pong you already exposed.</li>
+  </ul>
+  <p>After any kong, draw a <b>replacement tile</b> from the dead wall, then discard.</p>
+  <p><b>Robbing a kong</b>: when someone adds to a pong and that tile completes your hand, you may win on it.</p>
+
+  <h2 id="en-priority">7. Call priority</h2>
+  <p>When several players want the same discard: <b>win &gt; pong / kong &gt; chow</b>.</p>
+  <p>When several players can win on it:</p>
+  <ul>
+    <li><b>Single winner</b>: the first player after the discarder, in turn order, wins.</li>
+    <li><b>Multiple winners</b>: everyone who can win does, and the discarder pays each of them.</li>
+  </ul>
+  <div class="site"><b>On this site</b>Single winner by default. When you can call, buttons appear and you have a few seconds (8 by default) to decide; otherwise it counts as a pass.</div>
+
+  <h2 id="en-win">8. Winning: discard or self-draw</h2>
+  <ul>
+    <li><b>Win on a discard</b>: only the player who discarded the winning tile pays.</li>
+    <li><b>Self-draw</b>: you draw the winning tile yourself, and all three other players pay.</li>
+  </ul>
+  <p>There is <b>no minimum</b>: a hand worth zero tai can still win, and is paid the base amount only.</p>
+
+  <h2 id="en-ready">9. Ready, declaring ready, furiten</h2>
+  <p><b>Ready (tenpai)</b>: your hand is one tile away from winning. The tiles that would complete it are your <b>waits</b>.</p>
+  <div class="site"><b>On this site: tenpai helper</b>The table shows your waits and how many of each are still unseen. Only tiles everyone can see are subtracted: discards and exposed sets, not your own hand. On your turn, tiles that would leave you ready are marked with a gold bar.</div>
+  <div class="site"><b>On this site: declare ready (+1 tai)</b>When you select a tile that leaves you ready, you can press "Declare ready". Your hand is then locked: no chow, pong or kong, and every drawn tile that does not win is discarded for you. If a drawn tile wins, play pauses so you can self-draw. Winning afterwards adds 1 tai. You can still win without declaring, just without that tai.</div>
+  <p><b>Temporary furiten</b>: if you pass on a discard you could have won on, you cannot win on any discard until your next draw (self-draw is still allowed). This stops players waiting for a bigger win.</p>
+
+  <h2 id="en-draw">10. Draw games</h2>
+  <p>If the live wall runs out (only the dead wall is left) and nobody has won, the hand is a draw and no one pays.</p>
+
+  <h2 id="en-dealer">11. Dealer, streaks and rounds</h2>
+  <ul>
+    <li><b>Dealer</b>: the East seat, who discards first. Payments involving the dealer earn extra tai (next section).</li>
+    <li><b>Dealer streak</b>: if the dealer wins, or the hand is a draw, the dealer deals again.</li>
+    <li><b>Passing the deal</b>: if anyone else wins, the next player becomes dealer.</li>
+    <li><b>Rounds</b>: once all four have dealt, a round ends. The first round is East, the second is South.</li>
+  </ul>
+  <div class="site"><b>On this site</b>A match is the East and South rounds. It ends after South 4 (unless the dealer keeps the deal), and the result goes to the leaderboard. Everyone starts with 1000 points.</div>
+
+  <h2 id="en-pay">12. Payments: base and tai</h2>
+  <p>Before playing, agree on a <b>base</b> and a <b>per-tai</b> stake, e.g. "50 / 20". Each payment is:</p>
+  <p style="text-align:center;font-size:18px"><b>payment = base + tai × per-tai stake</b></p>
+  <ul>
+    <li>Win on a discard: the discarder makes one payment.</li>
+    <li>Self-draw: each of the other three makes one payment.</li>
+    <li><b>Dealer tai</b>: if the winner or the payer is the dealer, that payment gets <b>1 extra tai</b>, plus <b>2 more for each streak</b>. Dealer tai = 1 + 2 × streak count.</li>
+  </ul>
+  <div class="example"><b>Example 1</b>: 50 / 20. West discards and South wins with 3 tai; East is dealer and not involved.<br>West pays 50 + 3 × 20 = <b>110</b>.</div>
+  <div class="example"><b>Example 2</b>: 50 / 20. East is dealer on a 1-hand streak and self-draws with 3 tai. Dealer tai = 1 + 2 × 1 = 3.<br>South, West and North each pay 50 + (3 + 3) × 20 = <b>170</b>; East collects 510.</div>
+
+  <h2 id="en-tai">13. Tai table</h2>
+  <p>These are the items this site scores. A hand can match several items, and their tai add up.</p>
+  <table>
+    <thead><tr><th>Item</th><th>Condition</th><th style="text-align:right">Tai</th></tr></thead>
+    <tbody>
+      <tr><td>Self-draw</td><td>You draw the winning tile</td><td class="tai">1</td></tr>
+      <tr><td>Concealed hand</td><td>No chow, pong or exposed kong (concealed kongs are fine), win on a discard</td><td class="tai">1</td></tr>
+      <tr><td>Concealed self-draw</td><td>Both of the above (replaces them)</td><td class="tai">3</td></tr>
+      <tr><td>Seat wind</td><td>A pong of your own seat wind</td><td class="tai">1</td></tr>
+      <tr><td>Round wind</td><td>A pong of the round wind</td><td class="tai">1</td></tr>
+      <tr><td>Dragon pong</td><td>Each pong of red, green or white</td><td class="tai">1</td></tr>
+      <tr><td>Matching flower</td><td>Each flower matching your seat (East: Spring, Plum · South: Summer, Orchid · West: Autumn, Bamboo · North: Winter, Chrysanthemum)</td><td class="tai">1</td></tr>
+      <tr><td>Declared ready</td><td>Won after declaring ready on this site</td><td class="tai">1</td></tr>
+      <tr><td>Kong blossom</td><td>Self-draw on a kong replacement tile</td><td class="tai">1</td></tr>
+      <tr><td>Robbing a kong</td><td>Win on another player's added kong</td><td class="tai">1</td></tr>
+      <tr><td>Last tile</td><td>Self-draw on the last tile of the wall</td><td class="tai">1</td></tr>
+      <tr><td>Edge wait</td><td>Only a 3 or 7 completes the run (e.g. 1-2 waiting on 3)</td><td class="tai">1</td></tr>
+      <tr><td>Closed wait</td><td>Only the middle tile completes the run (e.g. 4-6 waiting on 5)</td><td class="tai">1</td></tr>
+      <tr><td>Single wait</td><td>Waiting on one tile to complete the pair</td><td class="tai">1</td></tr>
+      <tr><td>All chows</td><td>All five sets are chows, no honors, no flowers, win on a discard, not an edge/closed/single wait</td><td class="tai">2</td></tr>
+      <tr><td>All exposed</td><td>All five sets exposed by calls, win on a discard with a single wait</td><td class="tai">2</td></tr>
+      <tr><td>Three concealed pongs</td><td>Three pongs you drew yourself</td><td class="tai">2</td></tr>
+      <tr><td>All pongs</td><td>All five sets are pongs or kongs</td><td class="tai">4</td></tr>
+      <tr><td>Small three dragons</td><td>Two dragon pongs and a dragon pair (replaces dragon pong)</td><td class="tai">4</td></tr>
+      <tr><td>Half flush</td><td>One suit plus honors</td><td class="tai">4</td></tr>
+      <tr><td>Four concealed pongs</td><td>Four concealed pongs</td><td class="tai">5</td></tr>
+      <tr><td>Big three dragons</td><td>Pongs of all three dragons</td><td class="tai">8</td></tr>
+      <tr><td>Full flush</td><td>One suit only, no honors</td><td class="tai">8</td></tr>
+      <tr><td>All honors</td><td>Honors only</td><td class="tai">8</td></tr>
+      <tr><td>Small four winds</td><td>Three wind pongs and a wind pair</td><td class="tai">8</td></tr>
+      <tr><td>Five concealed pongs</td><td>Five concealed pongs</td><td class="tai">8</td></tr>
+      <tr><td>Eight flowers</td><td>All eight flowers</td><td class="tai">8</td></tr>
+      <tr><td>Human win</td><td>A non-dealer wins on the dealer's first discard</td><td class="tai">8</td></tr>
+      <tr><td>Earthly win</td><td>A non-dealer self-draws on their first draw</td><td class="tai">16</td></tr>
+      <tr><td>Big four winds</td><td>Pongs of all four winds</td><td class="tai">16</td></tr>
+      <tr><td>Heavenly win</td><td>The dealer's initial 17 tiles already win</td><td class="tai">24</td></tr>
+    </tbody>
+  </table>
+  <p>Heavenly, earthly and human wins do not also add self-draw or concealed tai. Dealer and streak tai are added to payments separately (previous section).</p>
+
+  <h2 id="en-vary">14. Variations not scored here</h2>
+  <div class="note"><b>There is no single official ruleset</b>Values and details differ by region and household, so agree on them before playing. Common differences:
+    <ul>
+      <li><b>Flower kong</b>: collecting all four seasons or all four plants, often 2 tai. Not scored here.</li>
+      <li><b>No flowers</b>: 1 tai for having no flowers. Not scored here.</li>
+      <li><b>Win after a kong discard</b>, <b>win on the last discard</b>: 1 tai each in some places. Not scored here.</li>
+      <li><b>Seven flowers robbing one</b>, <b>dealer-ready flower</b>, <b>earthly ready</b>: in this site's table, but not detected automatically yet.</li>
+      <li><b>Big hands</b>: some groups score them higher (e.g. big three dragons 16, heavenly win 64).</li>
+      <li><b>Matching flowers</b>: some English sources give West Autumn + Chrysanthemum and North Winter + Bamboo. This site follows the numbers printed on Taiwanese tiles (Plum 1, Orchid 2, Bamboo 3, Chrysanthemum 4).</li>
+      <li><b>Multiple winners</b>, <b>furiten</b> and <b>declaring ready</b>: played by some groups and not others.</li>
+    </ul></div>
+
+  <h2 id="en-terms">15. Glossary</h2>
+  <table><tbody>
+    <tr><td><b>上家 / 下家 / 對家</b></td><td>The player before you (left) / after you (right) / opposite</td></tr>
+    <tr><td><b>莊 / 閒</b></td><td>Dealer / the other three players</td></tr>
+    <tr><td><b>海底</b></td><td>The discards; also the last tile of the wall</td></tr>
+    <tr><td><b>王牌</b></td><td>Dead wall: the last 16 tiles, used for replacements</td></tr>
+    <tr><td><b>副露</b></td><td>Sets exposed by calling</td></tr>
+    <tr><td><b>眼睛</b></td><td>The pair in a winning hand</td></tr>
+    <tr><td><b>聽牌</b></td><td>Ready: one tile from winning</td></tr>
+    <tr><td><b>放槍 / 自摸</b></td><td>Discarding someone's winning tile / winning by self-draw</td></tr>
+    <tr><td><b>屁胡</b></td><td>A win worth zero tai</td></tr>
+    <tr><td><b>連莊 / 拉莊</b></td><td>The dealer keeps the deal / the extra tai for a streak</td></tr>
+  </tbody></table>
+
+  <a class="play" href="./online.html">Play now →</a>
+</article>
+
+<footer data-lang="zh">規則整理自本站程式的實際計算，並參考 <a href="https://mahjongo.com/taiwan" target="_blank" rel="noopener">MahJongo 台灣麻將規則</a> 與台灣常見玩法。</footer>
+<footer data-lang="en">Based on how this site actually scores, cross-checked with the <a href="https://mahjongo.com/taiwan" target="_blank" rel="noopener">MahJongo Taiwanese rules</a> and common Taiwanese play.</footer>
+</div>
+<script type="module">
+  import { tileFace } from './dist/web/tileView.js';
+  // 例牌記法：1m 萬、1p 筒、1s 索；E S W N 風；C 中、F 發、P 白；q1-4 春夏秋冬、h1-4 梅蘭竹菊；_ 空隔
+  const W={E:'east',S:'south',W:'west',N:'north'},D={C:'red',F:'green',P:'white'};
+  const SEASON=['spring','summer','autumn','winter'],PLANT=['plum','orchid','bamboo','chrysanthemum'];
+  const SUIT={m:'characters',p:'dots',s:'bamboo'};
+  function tileOf(code){
+    if(W[code])return {kind:'wind',wind:W[code],id:code};
+    if(D[code])return {kind:'dragon',dragon:D[code],id:code};
+    if(code[0]==='q')return {kind:'flower',flower:SEASON[+code[1]-1],id:code};
+    if(code[0]==='h')return {kind:'flower',flower:PLANT[+code[1]-1],id:code};
+    return {kind:'suit',suit:SUIT[code[1]],rank:+code[0],id:code};
+  }
+  document.querySelectorAll('[data-t]').forEach(el=>{
+    el.innerHTML=el.dataset.t.split(' ').map(c=>c==='_'?'<span class="gap"></span>':`<span class="tile">${tileFace(tileOf(c))}</span>`).join('');
+  });
+</script>
+<script>
+  (()=>{
+    const T={home:['← 首頁','← Home'],toggle:['EN','中文'],title:['麻將規則 · 東西南北麻將托兒所','Mahjong Rules · Four Winds Mahjong Nursery']};
+    let lang;try{lang=localStorage.getItem('tw-mj-lang');}catch{}
+    if(lang!=='zh'&&lang!=='en')lang=navigator.language.toLowerCase().startsWith('zh')?'zh':'en';
+    const apply=()=>{const i=lang==='zh'?0:1;document.documentElement.lang=lang==='zh'?'zh-Hant':'en';document.title=T.title[i];document.querySelectorAll('[data-i]').forEach(el=>el.textContent=T[el.dataset.i][i]);document.getElementById('lang-btn').textContent=T.toggle[i];};
+    document.getElementById('lang-btn').onclick=()=>{lang=lang==='zh'?'en':'zh';try{localStorage.setItem('tw-mj-lang',lang);}catch{}apply();};
+    apply();
+  })();
+</script>
+<script>if("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(()=>{});</script>
+</body>
+</html>

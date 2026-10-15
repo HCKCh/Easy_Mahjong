@@ -1,18 +1,30 @@
-# Build and Release Folders
-bin-debug/
-bin-release/
-[Oo]bj/
-[Bb]in/
+# Secrets: real values live only on the server (copy .env.example to .env)
+.env
+.env.*
+!.env.example
 
-# Other files and folders
-.settings/
+# Dependencies
+node_modules/
 
-# Executables
-*.swf
-*.air
-*.ipa
-*.apk
+# Runtime data: saved rooms and leaderboard (may contain player names)
+data/
 
-# Project files, i.e. `.project`, `.actionScriptProperties` and `.flexProperties`
-# should NOT be excluded as they contain compiler settings and other important
-# information for Eclipse / Flash Builder.
+# Leaderboard / match results, wherever they end up (file driver writes data/results.json;
+# in production the leaderboard lives in Redis key mj:results, which is never in the repo)
+results.json
+**/results.json
+*.results.json
+leaderboard*.json
+
+# Archives, logs and editor / OS files
+*.tar.gz
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.claude/
+
+# dist/ is committed on purpose: the Docker image copies the prebuilt dist/
+# (it does not run `npm run build`), so the repo must ship compiled files.
