@@ -1,4 +1,4 @@
-const CACHE='tw-mj-stage3.3-v15';
+const CACHE='tw-mj-stage3.3-v20';
 const SHELL=['./','./index.html','./online.html','./rules.html','./online.css','./styles.css','./manifest.webmanifest'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});

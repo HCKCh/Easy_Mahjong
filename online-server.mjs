@@ -11,6 +11,7 @@ import {
 import { declareReady,discardTile,drawTile } from './dist/core/engine/game.js';
 import { createMatch,currentPrevailingWind,settleCurrentHand,startNextHand } from './dist/core/match/match.js';
 import { tileKey } from './dist/core/engine/tiles.js';
+import { auditTiles } from './dist/core/engine/audit.js';
 import { chooseDiscard,chooseReaction } from './dist/web/bot.js';
 
 const ROOT=path.dirname(fileURLToPath(import.meta.url));
@@ -48,6 +49,8 @@ function firstEmptySeat(room){return seatOrder.find(s=>!room.seats[s]);}
 function connectedClient(room,id){const w=room.clients.get(id)?.ws;return !!w&&!w.destroyed;}
 // 開局條件：每位玩家起始點數、預設底／台
 const STARTING_POINTS=1000;
+// 結算畫面倒數：時間到自動開下一局（0 = 停用，由房主手動）
+const NEXT_HAND_SECONDS=Math.max(0,Number(process.env.NEXT_HAND_SECONDS??10));
 const DEFAULT_BASE=50,DEFAULT_PER_TAI=20;
 function totalsInit(){return {east:STARTING_POINTS,south:STARTING_POINTS,west:STARTING_POINTS,north:STARTING_POINTS};}
 const persistTimers=new Map();
@@ -64,7 +67,7 @@ function serializeRoom(room){
 function hydrateRoom(raw){
   const clients=new Map((raw.clients||[]).map(c=>[c.clientId,{...c,ws:undefined}]));
   const room={
-    code:raw.code,hostClientId:raw.hostClientId,status:raw.status==='wind'?'lobby':(raw.status||'lobby'),settings:raw.settings||{base:DEFAULT_BASE,perTai:DEFAULT_PER_TAI,ronMode:'single',reactionSeconds:8},
+    code:raw.code,hostClientId:raw.hostClientId,status:raw.status==='wind'?'lobby':(raw.status||'lobby'),settings:{nextHandSeconds:NEXT_HAND_SECONDS,...(raw.settings||{base:DEFAULT_BASE,perTai:DEFAULT_PER_TAI,ronMode:'single',reactionSeconds:8})},
     clients,seats:raw.seats||{},match:raw.match,totals:raw.totals||totalsInit(),lastRecord:raw.lastRecord,
     settledGame:raw.lastRecord&&raw.match?.game?.phase==='ended'?raw.match.game:undefined,pending:undefined,botTimer:undefined,
     notice:raw.notice||'房間已從持久化資料恢復',lastActivity:raw.lastActivity||Date.now(),expiresAt:raw.expiresAt||Date.now()+ROOM_TTL_SECONDS*1000,
@@ -90,14 +93,23 @@ function recordResult(room,finished){
   persistence.pushResult(rec).catch(e=>console.warn('[results] save failed',room.code,e?.message||e));
 }
 function applyRecord(room,rec){for(const p of rec.payments){room.totals[p.from]-=p.amount;room.totals[p.to]+=p.amount;}room.lastRecord=rec;room.settledGame=room.match.game;}
-function settleIfEnded(room){const g=room.match?.game;if(!g||g.phase!=='ended'||room.settledGame===g)return;if(!g.endReason)return;const rec=settleCurrentHand(room.match);applyRecord(room,rec);room.status='ended';if(room.match.status==='ended')recordResult(room,true);}
+function settleIfEnded(room){const g=room.match?.game;if(!g||g.phase!=='ended'||room.settledGame===g)return;if(!g.endReason)return;const audit=auditTiles(g);if(!audit.ok)console.error(`[audit] room=${room.code} tile check failed: ${audit.problems.join('; ')}`);const rec=settleCurrentHand(room.match);applyRecord(room,rec);room.status='ended';if(room.match.status==='ended')recordResult(room,true);scheduleAutoNext(room);}
+function clearAutoNext(room){if(room.nextTimer)clearTimeout(room.nextTimer);room.nextTimer=undefined;room.nextDeadline=undefined;}
+// 結算後倒數，時間到幫大家按「下一局」（同一局還停在結算畫面才會觸發）
+function scheduleAutoNext(room){
+  clearAutoNext(room);
+  const secs=Number(room.settings?.nextHandSeconds??NEXT_HAND_SECONDS);if(!secs)return;
+  const g=room.match?.game;room.nextDeadline=Date.now()+secs*1000;
+  room.nextTimer=setTimeout(()=>{room.nextTimer=undefined;if(room.status!=='ended'||room.match?.game!==g||!rooms.has(room.code))return;try{nextHand(room);}catch(e){console.error('[auto-next]',room.code,e?.message||e);}},secs*1000);
+  room.nextTimer.unref?.();
+}
 function scoreLines(rec){const score=rec?.score;return score?.items?.map(i=>({label:i.label,tai:i.tai}))||[];}
-function publicPlayer(room,seat,viewerSeat){const o=ownerFor(room,seat);if(!o)return undefined;const g=room.match?.game;const ps=g?.players?.[seat];const base={seat,name:o.name,kind:o.kind,avatar:o.avatar,connected:o.kind==='bot'?true:connectedClient(room,o.clientId),ready:o.kind==='bot'?true:(room.clients.get(o.clientId)?.ready??false),concealedCount:ps?.concealed.length??0,declaredReady:!!ps&&isReadyDeclared(g,seat),flowers:ps?.flowers??[],melds:ps?.melds??[],discards:ps?.discards??[]};if(ps&&viewerSeat===seat)base.concealed=ps.concealed;return base;}
+function publicPlayer(room,seat,viewerSeat){const o=ownerFor(room,seat);if(!o)return undefined;const g=room.match?.game;const ps=g?.players?.[seat];const base={seat,name:o.name,kind:o.kind,avatar:o.avatar,connected:o.kind==='bot'?true:connectedClient(room,o.clientId),ready:o.kind==='bot'?true:(room.clients.get(o.clientId)?.ready??false),concealedCount:ps?.concealed.length??0,declaredReady:!!ps&&isReadyDeclared(g,seat),flowers:ps?.flowers??[],melds:ps?.melds??[],discards:ps?.discards??[]};if(ps&&(viewerSeat===seat||g.phase==='ended'))base.concealed=ps.concealed;return base;}
 function promptFor(room,seat){if(!room.match)return undefined;const g=room.match.game;const pending=room.pending;if(!pending||!pending.humans.has(seat))return undefined;const options=g.phase==='awaiting_kong_reactions'?getKongReactionOptions(g,seat):getReactionOptions(g,seat);return{kind:g.phase==='awaiting_kong_reactions'?'kong-reaction':'discard-reaction',options:options.filter(o=>o.type!=='pass'),deadline:pending.deadline};}
-function snapshot(room,clientId){const c=room.clients.get(clientId);const viewerSeat=c?.seat;const out={code:room.code,hostClientId:room.hostClientId,you:c?{clientId,name:c.name,seat:c.seat}:undefined,status:room.status,players:{},settings:room.settings,notice:room.notice};for(const s of seatOrder){const p=publicPlayer(room,s,viewerSeat);if(p)out.players[s]=p;}if(room.status==='wind'&&room.windDraw)out.windDraw=windDrawView(room,viewerSeat);if(room.match&&viewerSeat){const g=room.match.game,k=availableKongs(g,viewerSeat);out.game={phase:g.phase,turn:g.turn,dealer:g.dealer,wallCount:g.wall.length,deadWallCount:g.deadWall.length,lastDiscard:g.lastDiscard,lastDrawId:g.lastDraw?.seat===viewerSeat?g.lastDraw.tile.id:undefined,roundLabel:roundLabel(room.match),dealerContinuations:room.match.dealerContinuations,totals:room.totals,prompt:promptFor(room,viewerSeat),canSelfDraw:canSelfDraw(g,viewerSeat),concealedKongs:k.concealed,addedKongs:k.added,settlement:room.lastRecord?{winners:room.lastRecord.winners||[],endReason:room.lastRecord.endReason,lines:scoreLines(room.lastRecord),handTai:room.lastRecord.score?.handTai,payments:room.lastRecord.payments}:undefined};}return out;}
+function snapshot(room,clientId){const c=room.clients.get(clientId);const viewerSeat=c?.seat;const out={code:room.code,hostClientId:room.hostClientId,you:c?{clientId,name:c.name,seat:c.seat}:undefined,status:room.status,players:{},settings:room.settings,notice:room.notice};for(const s of seatOrder){const p=publicPlayer(room,s,viewerSeat);if(p)out.players[s]=p;}if(room.status==='wind'&&room.windDraw)out.windDraw=windDrawView(room,viewerSeat);if(room.match&&viewerSeat){const g=room.match.game,k=availableKongs(g,viewerSeat);out.game={phase:g.phase,turn:g.turn,dealer:g.dealer,wallCount:g.wall.length,deadWallCount:g.deadWall.length,lastDiscard:g.lastDiscard,lastDrawId:g.lastDraw?.seat===viewerSeat?g.lastDraw.tile.id:undefined,roundLabel:roundLabel(room.match),dealerContinuations:room.match.dealerContinuations,totals:room.totals,prompt:promptFor(room,viewerSeat),canSelfDraw:canSelfDraw(g,viewerSeat),concealedKongs:k.concealed,addedKongs:k.added,settlement:room.lastRecord?{winners:room.lastRecord.winners||[],endReason:room.lastRecord.endReason,lines:scoreLines(room.lastRecord),handTai:room.lastRecord.score?.handTai,payments:room.lastRecord.payments,nextDeadline:room.nextDeadline,winningTile:g.winningTile,winFrom:g.winFrom,details:(room.lastRecord.scores||[]).map(sc=>({seat:sc.winner,handTai:sc.handTai,lines:sc.items.map(i=>({label:i.label,tai:i.tai}))})),audit:auditTiles(g)}:undefined};}return out;}
 function broadcast(room){room.lastProgress=Date.now();settleIfEnded(room);schedulePersist(room);for(const [id,c] of room.clients)if(c.ws&&!c.ws.destroyed)send(c.ws,{type:'SNAPSHOT',snapshot:snapshot(room,id)});}
 function err(ws,message){send(ws,{type:'ERROR',message});}
-function makeRoom(hostId,name,settings={}){const code=roomCode();const room={code,hostClientId:hostId,status:'lobby',lastActivity:Date.now(),expiresAt:Date.now()+ROOM_TTL_SECONDS*1000,settings:{base:Number(settings.base??DEFAULT_BASE),perTai:Number(settings.perTai??DEFAULT_PER_TAI),ronMode:settings.ronMode==='multiple'?'multiple':'single',reactionSeconds:Number(settings.reactionSeconds??8)},clients:new Map(),seats:{},match:undefined,totals:totalsInit(),lastRecord:undefined,settledGame:undefined,pending:undefined,botTimer:undefined,notice:'好友房已建立'};rooms.set(code,room);return room;}
+function makeRoom(hostId,name,settings={}){const code=roomCode();const room={code,hostClientId:hostId,status:'lobby',lastActivity:Date.now(),expiresAt:Date.now()+ROOM_TTL_SECONDS*1000,settings:{base:Number(settings.base??DEFAULT_BASE),perTai:Number(settings.perTai??DEFAULT_PER_TAI),ronMode:settings.ronMode==='multiple'?'multiple':'single',reactionSeconds:Number(settings.reactionSeconds??8),nextHandSeconds:NEXT_HAND_SECONDS},clients:new Map(),seats:{},match:undefined,totals:totalsInit(),lastRecord:undefined,settledGame:undefined,pending:undefined,botTimer:undefined,notice:'好友房已建立'};rooms.set(code,room);return room;}
 function attachClient(room,rec){room.clients.set(rec.clientId,rec);if(rec.seat)room.seats[rec.seat]={kind:'human',clientId:rec.clientId,name:rec.name,avatar:rec.avatar};}
 function takenAvatars(room,exceptSeat){return new Set(seatOrder.filter(s=>s!==exceptSeat).map(s=>room.seats[s]?.avatar).filter(a=>a!==undefined));}
 function validAvatar(a){return Number.isInteger(a)&&a>=0&&a<AVATAR_COUNT;}
@@ -175,12 +187,12 @@ function advance(room){if(!room.match||room.status==='lobby'||room.pending)retur
   if(g.phase==='awaiting_discard'){const s=g.turn;if(isBot(room,s)){botOwnTurn(room,s);broadcast(room);advance(room);}else if(autoPlays(room,s)&&g.lastDraw?.seat===s){discardTile(g,s,g.lastDraw.tile.id);broadcast(room);advance(room);}else broadcast(room);return;}
   if(g.phase==='awaiting_reactions'||g.phase==='awaiting_kong_reactions'){beginReactionWindow(room);return;}
  }catch(e){if(room.match?.game?.phase==='ended')aiLog(room,room.match.game.turn,'hand_ended',{reason:room.match.game.endReason});else dumpRoom(room,'advance-error',e);room.notice=e.message||String(e);broadcast(room);}},isBot(room,room.match.game.turn)||autoPlays(room,room.match.game.turn)?BOT_DELAY_MS:HUMAN_DELAY_MS);}
-function nextHand(room){if(!room.match||room.match.game.phase!=='ended')throw new Error('本局尚未結束');if(room.match.status==='ended'){beginWindDraw(room);broadcast(room);return;}startNextHand(room.match);room.lastRecord=undefined;room.settledGame=undefined;room.status='playing';room.notice='下一局開始';broadcast(room);advance(room);}
+function nextHand(room){if(!room.match||room.match.game.phase!=='ended')throw new Error('本局尚未結束');clearAutoNext(room);if(room.match.status==='ended'){beginWindDraw(room);broadcast(room);return;}startNextHand(room.match);room.lastRecord=undefined;room.settledGame=undefined;room.status='playing';room.notice='下一局開始';broadcast(room);advance(room);}
 function findRoomByClient(id){for(const r of rooms.values())if(r.clients.has(id))return r;}
 // 刪除房間：停掉計時器、從記憶體與持久化移除
 function destroyRoom(room){
   recordResult(room,false);
-  const p=room.pending;if(p?.timer)clearTimeout(p.timer);if(room.botTimer)clearTimeout(room.botTimer);clearWindTimers(room);
+  const p=room.pending;if(p?.timer)clearTimeout(p.timer);if(room.botTimer)clearTimeout(room.botTimer);clearWindTimers(room);clearAutoNext(room);
   const t=persistTimers.get(room.code);if(t){clearTimeout(t);persistTimers.delete(room.code);}
   rooms.delete(room.code);
   persistence.remove(room.code).catch(e=>console.warn('[persistence] remove failed',room.code,e?.message||e));
@@ -236,7 +248,7 @@ function disconnect(ws){const m=sockets.get(ws);sockets.delete(ws);if(!m?.client
 
 for(const raw of await persistence.loadAll()){
   if(!raw?.code)continue;
-  try{rooms.set(raw.code,hydrateRoom(raw));}catch(e){console.warn('[persistence] restore skipped',raw.code,e?.message||e);}
+  try{const r=hydrateRoom(raw);rooms.set(raw.code,r);if(r.status==='ended'&&r.match?.game?.phase==='ended')scheduleAutoNext(r);}catch(e){console.warn('[persistence] restore skipped',raw.code,e?.message||e);}
 }
 console.log(`[persistence] restored ${rooms.size} room(s)`);
 
@@ -257,6 +269,8 @@ const server=http.createServer((req,res)=>{
     return;
   }
   if(url==='/')url='/index.html';
+  // 不提供點開頭的檔案或資料夾（.env、.gittoken、.git…）
+  if(url.split('/').some(seg=>seg.startsWith('.'))){res.writeHead(404);return res.end('Not found');}
   const f=path.normalize(path.join(ROOT,url));
   if(!f.startsWith(ROOT)){res.writeHead(403);return res.end('Forbidden');}
   fs.stat(f,(e,st)=>{if(e||!st.isFile()){res.writeHead(404);return res.end('Not found');}res.writeHead(200,{'Content-Type':mime[path.extname(f)]||'application/octet-stream','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});fs.createReadStream(f).pipe(res);});

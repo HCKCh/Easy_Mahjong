@@ -25,6 +25,6 @@ Thumbs.db
 .vscode/
 .idea/
 .claude/
-
+*token
 # dist/ is committed on purpose: the Docker image copies the prebuilt dist/
 # (it does not run `npm run build`), so the repo must ship compiled files.

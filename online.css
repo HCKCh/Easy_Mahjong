@@ -334,3 +334,168 @@
 .rules-link{text-decoration:none;display:inline-flex;align-items:center;border-radius:13px}
 .side-panel .rules-btn,.mobile-sheet .rules-btn{display:block;text-align:center;text-decoration:none;padding:12px 16px;border-radius:13px;border:1px solid #bdc9c1;background:#fff;color:#17352c;font-weight:850}
 .side-panel .rules-btn{margin:0 0 8px}
+/* 剛摸的牌和手牌拉開距離，一眼分得出來 */
+.online-shell .you .hand .mj.drawn-slot{margin-left:calc(var(--hd) * .5)}
+
+/* ===== 結算畫面（胡牌動畫＋結算合一） ===== */
+.win-result{position:fixed;inset:0;z-index:95;overflow:auto;display:flex;flex-direction:column;align-items:center;gap:14px;padding:18px 12px 28px;background:radial-gradient(circle,#0008 0,#000c 100%)}
+.win-result::before{content:"";position:fixed;inset:-50%;pointer-events:none;background:repeating-conic-gradient(from 0deg,#ffffff30 0deg 1.6deg,#0000 1.6deg 7deg);mask:radial-gradient(circle,#0000 22%,#000 60%);-webkit-mask:radial-gradient(circle,#0000 22%,#000 60%);animation:speedSpin 2.6s linear infinite,speedFade 2.8s ease forwards}
+@keyframes speedFade{0%,60%{opacity:1}100%{opacity:0}}
+.res-bands{position:relative;width:100%;display:flex;flex-direction:column;gap:10px;flex:0 0 auto}
+.win-result .cutin-band{margin-left:-10vw;animation:cutinIn .38s cubic-bezier(.2,1.4,.4,1) var(--delay) forwards}
+.win-result .cutin-face{width:clamp(70px,13vw,140px)}
+.win-result .cutin-word{font-size:clamp(40px,8vw,96px)}
+.res-plus{color:#ffe36a;margin-left:8px}
+.res-draw-title{position:relative;color:#fff;font-size:clamp(36px,7vw,72px);font-weight:950;-webkit-text-stroke:2px #1a1a1a;paint-order:stroke fill;text-shadow:5px 5px 0 #1a1a1a;margin-top:10px}
+.result-panel{position:relative;--rt:clamp(22px,2.3vw,36px);width:min(1000px,100%);background:#faf7ee;color:#18342b;border-radius:20px;padding:16px clamp(12px,3vw,26px) 18px;box-shadow:0 24px 60px #0009;opacity:0;animation:panelUp .4s ease-out var(--panel-delay) forwards}
+@keyframes panelUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+.result-panel .result-kicker{font-size:12px;letter-spacing:.12em;font-weight:900;color:#7b6840;margin-bottom:6px}
+.result-panel .mj.small.res-tile{width:var(--rt);height:calc(var(--rt) * 1.38);border-radius:4px;box-shadow:0 2px 0 #1d8b47,0 3px 4px #0003}
+.result-panel .mj.small.win-tile{outline:3px solid #f0b52e;outline-offset:1px;box-shadow:0 0 14px #ffd76a,0 2px 0 #1d8b47}
+.res-win{background:#fff;border:1px solid #e1e6e2;border-radius:16px;padding:10px 12px;margin-bottom:10px}
+.res-win-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}.res-win-head b{font-size:17px}
+.res-total{margin-left:auto;font-weight:950;color:#176044;font-size:18px}
+.res-mini-face{width:30px;height:30px;border-radius:50%;overflow:hidden;background:#fff;box-shadow:0 0 0 2px #17604433;flex:0 0 auto;display:inline-block}
+.res-mini-face svg{width:100%;height:100%;display:block}
+.res-hand{display:flex;flex-wrap:wrap;align-items:flex-end;gap:2px}
+.res-meld,.res-concealed,.res-flowers{display:inline-flex;gap:1px}
+.res-meld{margin-right:calc(var(--rt) * .3);padding:2px;border-radius:6px;background:#e8efe9}
+.res-flowers{margin-left:calc(var(--rt) * .5)}
+.res-winning{display:inline-flex;flex-direction:column;align-items:center;margin-left:calc(var(--rt) * .9)}
+.res-winning small,.res-dealin small{font-size:11px;font-weight:900;color:#b3482e;margin-top:3px}
+.res-lines{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.res-lines span{background:#eef3f0;border-radius:999px;padding:3px 10px;font-size:13px}.res-lines b{color:#176044}
+.res-people{display:flex;flex-wrap:wrap;justify-content:center;gap:clamp(10px,3vw,30px);margin:6px 0 12px}
+.res-person{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e1e6e2;border-radius:16px;padding:8px 12px}
+.res-face{width:clamp(48px,6vw,72px);border-radius:50%;overflow:hidden;background:#dfe9f5;box-shadow:0 0 0 3px #1a1a1a22}
+.res-face svg{display:block;width:100%;height:auto}
+.res-person.lost .res-face{box-shadow:0 0 0 3px #b3482e;animation:loserShake .35s ease-in-out calc(var(--panel-delay,0s) + .2s) 3}
+.res-dealin{display:flex;flex-direction:column;align-items:center}
+.res-person-copy{display:grid}.res-person-copy b{font-size:14px}.res-person-copy span{font-size:20px;font-weight:950;color:#5f716a}.res-person-copy span.neg{color:#b3482e}
+.res-all{background:#fff;border:1px solid #e1e6e2;border-radius:14px;padding:8px 12px;margin-bottom:10px}
+.res-all summary{cursor:pointer;font-weight:900}
+.res-all-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 0;border-top:1px solid #eef1ef}.res-all-row:first-of-type{border-top:0}
+.res-all-row>b{min-width:70px;font-size:13px}
+.res-audit{font-size:12.5px;color:#2d6b4f;margin:4px 0 12px}.res-audit.bad{color:#b3482e;font-weight:900}
+.res-wait{text-align:center;color:#5f716a}
+.win-result.still,.win-result.still *,.win-result.still::before{animation:none!important}
+.win-result.still .cutin-band{transform:skewY(-6deg)}
+.win-result.still .result-panel{opacity:1}
+.win-result.still::before{opacity:0}
+@media(prefers-reduced-motion:reduce){.win-result *,.win-result::before{animation:none!important}.win-result .cutin-band{transform:skewY(-6deg)}.win-result .result-panel{opacity:1}}
+/* 結束後牌桌上的對手手牌翻開 */
+.online-shell .opp .backs.revealed .mj{box-shadow:0 1px 0 #1d8b47}
+/* 重畫時接續動畫：所有延遲都扣掉已經經過的時間 */
+.win-result{--elapsed:0s}
+.win-result::before{animation-delay:0s,calc(0s - var(--elapsed))}
+.win-result .cutin-band{animation-delay:calc(var(--delay) - var(--elapsed))}
+.win-result .cutin-face{animation-delay:calc(.3s + var(--delay) - var(--elapsed))}
+.win-result .cutin-word{animation-delay:calc(.22s + var(--delay) - var(--elapsed))}
+.win-result .result-panel{animation-delay:calc(var(--panel-delay) - var(--elapsed))}
+.win-result .res-person.lost .res-face{animation-delay:calc(var(--panel-delay,0s) + .2s - var(--elapsed))}
+/* 結算：付款算式 */
+.res-pay{background:#fff;border:1px solid #e1e6e2;border-radius:14px;padding:8px 12px;margin-bottom:10px;font-size:13.5px}
+.res-pay ul{margin:4px 0;padding-left:18px}.res-pay li{margin:2px 0}.res-pay small{color:#7b6840;font-weight:800}
+.res-pay p{margin:4px 0 0;font-size:12px;color:#5f716a}
+/* 結算畫面在手機（矮螢幕）縮小 */
+@media(max-height:600px),(max-width:700px){
+  .win-result{gap:8px;padding:8px 8px 16px}
+  .res-bands{gap:4px}
+  .win-result .cutin-band{padding:4px 0 4px 14vw;gap:10px}
+  .win-result .cutin-face{width:clamp(40px,8vh,64px)}
+  .win-result .cutin-word{font-size:clamp(24px,7vh,44px);-webkit-text-stroke:2px #1a1a1a;text-shadow:3px 3px 0 #1a1a1a}
+  .win-result .cutin-name{font-size:14px;margin-top:2px}
+  .res-draw-title{font-size:32px;margin-top:4px}
+  .result-panel{--rt:clamp(16px,2.6vw,22px);padding:10px 12px 12px;border-radius:14px}
+  .res-win{padding:7px 9px;margin-bottom:7px}.res-win-head b{font-size:14px}.res-total{font-size:14px}
+  .res-lines span{font-size:11.5px;padding:2px 8px}
+  .res-people{gap:8px;margin:4px 0 8px}.res-person{padding:5px 8px;gap:6px}
+  .res-face{width:36px}.res-person-copy b{font-size:12px}.res-person-copy span{font-size:15px}
+  .res-pay{font-size:12px;padding:6px 10px}
+  .result-panel .primary.wide{padding:10px}
+}
+
+/* ===== 結算畫面：手機版重新設計 ===== */
+.res-head{display:none}
+.res-pay summary{cursor:pointer;font-weight:900}
+.res-foot .res-audit{margin:4px 0 10px}
+@media(max-height:600px),(max-width:700px){
+  .win-result{justify-content:center;padding:6px calc(8px + var(--safe-x,0px)) 8px}
+  /* 動畫播完，橫幅收起，結算卡片接手 */
+  .win-result.has-bands .res-bands{max-height:70vh;animation:bandsAway .35s ease-in calc(2.2s - var(--elapsed)) forwards}
+  .win-result.has-bands .result-panel{animation-delay:calc(2.35s - var(--elapsed))}
+  .win-result.still .res-bands,.win-result.still .res-draw-title{display:none}
+  .win-result:not(.has-bands) .res-draw-title{display:none}
+  .result-panel{--rt:clamp(14px,min(2.25vw,5.2vh),22px);width:min(980px,100%);max-height:calc(100vh - 12px);overflow:auto;padding:8px 10px;border-radius:14px;
+    display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);grid-template-areas:"head head" "wins people" "pay people" "all all" "foot foot";gap:6px 10px;align-items:start}
+  .result-panel>.result-kicker{display:none}
+  .res-head{grid-area:head;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-bottom:4px;border-bottom:1px solid #e1e6e2}
+  .res-head-item{display:inline-flex;align-items:center;gap:6px}
+  .res-head-item .res-mini-face{width:28px;height:28px}
+  .res-head-word{font-size:20px;font-weight:950;color:#c62828}
+  .res-head-name{font-weight:900;font-size:14px}
+  .res-head .res-plus{color:#176044;margin-left:0;font-size:16px}
+  .res-head-round{margin-left:auto;font-size:11px;font-weight:900;color:#7b6840;letter-spacing:.08em}
+  .res-wins{grid-area:wins;min-width:0}
+  .res-win{margin:0 0 6px;padding:6px 8px;border-radius:12px}
+  .res-win-head{margin-bottom:4px;gap:6px}.res-win-head .res-mini-face{display:none}.res-win-head b{font-size:13px}.res-total{font-size:13px}
+  .res-hand{gap:1px;flex-wrap:nowrap;overflow-x:auto}
+  .res-meld{padding:1px;margin-right:3px}
+  .res-winning{margin-left:calc(var(--rt) * .6)}.res-winning small,.res-dealin small{font-size:9px;margin-top:1px}
+  .res-lines{gap:4px;margin-top:6px}.res-lines span{font-size:11px;padding:1px 7px}
+  .res-people{grid-area:people;display:flex;flex-direction:column;align-items:stretch;gap:4px;margin:0}
+  .res-person{padding:4px 8px;gap:6px;border-radius:12px}
+  .res-face{width:30px;box-shadow:0 0 0 2px #1a1a1a22}.res-person.lost .res-face{box-shadow:0 0 0 2px #b3482e}
+  .res-person-copy{display:flex;align-items:baseline;gap:6px;flex:1;min-width:0}
+  .res-person-copy b{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .res-person-copy span{font-size:14px;margin-left:auto}
+  .res-dealin{flex-direction:row;gap:3px;order:3}
+  .res-pay{grid-area:pay;margin:0;padding:5px 9px;font-size:11.5px;border-radius:12px}
+  .res-pay ul{padding-left:16px}
+  .res-all{grid-area:all;margin:0;padding:5px 9px;border-radius:12px;font-size:12px}
+  .res-all-row>b{min-width:56px;font-size:11.5px}.res-all-row .res-mini-face{width:22px;height:22px}
+  .res-foot{grid-area:foot;display:flex;align-items:center;gap:10px}
+  .res-foot .res-audit{margin:0;font-size:10.5px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .res-foot .primary.wide{width:auto;flex:0 0 auto;padding:8px 22px!important;min-height:0}
+  .res-foot .res-wait{margin:0;font-size:12px}
+}
+/* 直向手機：單欄 */
+@media(max-width:700px) and (orientation:portrait){
+  .result-panel{grid-template-columns:minmax(0,1fr);grid-template-areas:"head" "wins" "people" "pay" "all" "foot";--rt:clamp(14px,5vw,20px)}
+  .res-hand{flex-wrap:wrap}
+}
+@keyframes bandsAway{to{opacity:0;max-height:0;margin:0;transform:translateY(-20px)}}
+/* 手機：卡片固定置中、不佔版面，動畫時橫幅不會被擠出畫面 */
+@media(max-height:600px),(max-width:700px){
+  .win-result .result-panel{position:fixed;left:0;right:0;top:0;bottom:0;margin:auto;height:fit-content;width:min(980px,calc(100% - 16px - 2 * var(--safe-x,0px)))}
+}
+
+/* ===== 結算：手機改用分頁，「下一局」固定在底部，不用捲動 ===== */
+.res-tabs{display:none}
+.res-body{display:contents}
+@media(max-height:600px),(max-width:700px){
+  .win-result .result-panel{display:flex;flex-direction:column;gap:6px;max-height:calc(100vh - 12px);max-height:calc(100dvh - 12px)}
+  .res-tabs{display:flex;gap:6px;flex:0 0 auto}
+  .res-tabs button{flex:1;padding:5px 8px!important;border-radius:999px;border:1px solid #cfd7d2;background:#eef3f0;color:#2d5c49;font-size:12px;font-weight:900;min-height:0}
+  .res-tabs button.active{background:#176044;color:#fff;border-color:#176044}
+  .res-body{display:block;flex:1 1 auto;min-height:0;overflow:auto}
+  .res-tab{display:none}
+  .tab-result .res-tab-result{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:6px 10px;align-items:start}
+  .tab-hands .res-tab-hands,.tab-pay .res-tab-pay{display:block}
+  .res-tab .res-pay,.res-tab .res-all{margin:0}
+  .res-tab .res-pay summary,.res-tab .res-all summary{display:none}
+  .res-all-row{padding:4px 0}
+  .res-foot{flex:0 0 auto;padding-top:6px;border-top:1px solid #e1e6e2}
+}
+@media(max-width:700px) and (orientation:portrait){
+  .tab-result .res-tab-result{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-height:600px),(max-width:700px){
+  /* 取消舊版兩欄 grid 的區塊名稱，避免在分頁 grid 裡被放到隱含格子 */
+  .res-tab-result .res-wins,.res-tab-result .res-people,.res-tab .res-pay,.res-tab .res-all{grid-area:auto}
+}
+/* 手機結算卡片固定大小，切分頁只換內容；分頁標籤不換行 */
+@media(max-height:600px),(max-width:700px){
+  .win-result .result-panel{height:min(calc(100vh - 12px),440px);height:min(calc(100dvh - 12px),440px)}
+  .res-tabs button{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;font-size:clamp(10px,2.6vw,12px)}
+}

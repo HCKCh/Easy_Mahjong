@@ -1,4 +1,5 @@
 import { tileKey } from './tiles.js';
+import { sortTiles } from './hand.js';
 // Standard Taiwan 16-tile hand: 5 melds + 1 pair total.
 // This legacy helper expects the supplied collection itself to contain all melds.
 export function isStandardWinningHand(tiles) {
@@ -37,10 +38,13 @@ function isValidMeld(meld) {
     const ranks = suitTiles.map(t => t.rank).sort((a, b) => a - b);
     return ranks[1] === ranks[0] + 1 && ranks[2] === ranks[1] + 1;
 }
+// Counts must be built in sorted order: canFormMelds always takes the first remaining
+// tile and only tries runs that START at it. With unsorted input (e.g. a claimed tile
+// appended at the end) a run like 3-4-5 was missed when 4 came before 3.
 function canFormExactMeldsAndPair(tiles, exactMelds) {
     const counts = new Map();
     const proto = new Map();
-    for (const t of tiles) {
+    for (const t of sortTiles(tiles)) {
         const k = tileKey(t);
         counts.set(k, (counts.get(k) ?? 0) + 1);
         proto.set(k, t);
@@ -90,6 +94,67 @@ const tileTypes = [
     ...['east', 'south', 'west', 'north'].map(wind => ({ kind: 'wind', wind, id: `probe-wind-${wind}` })),
     ...['red', 'green', 'white'].map(dragon => ({ kind: 'dragon', dragon, id: `probe-dragon-${dragon}` })),
 ];
+// Every tile type that would complete this hand (empty when not ready).
+export function winningTileTypes(concealed, melds) {
+    return tileTypes.filter(t => isWinningHandWithMelds([...concealed, t], melds));
+}
+// All ways to split `tiles` into exactly `sets` sets plus one pair (used by scoring,
+// which takes the decomposition worth the most tai).
+export function decompose(tiles, sets) {
+    const counts = new Map();
+    const proto = new Map();
+    for (const t of sortTiles(tiles)) {
+        const k = tileKey(t);
+        counts.set(k, (counts.get(k) ?? 0) + 1);
+        proto.set(k, t);
+    }
+    const out = [];
+    for (const [pair, n] of counts) {
+        if (n < 2)
+            continue;
+        const work = new Map(counts);
+        work.set(pair, n - 2);
+        const found = [];
+        enumerateSets(work, proto, sets, [], found);
+        for (const f of found)
+            out.push({ pair, sets: f });
+    }
+    return out;
+}
+function enumerateSets(counts, proto, left, acc, out) {
+    const next = [...counts.entries()].find(([, n]) => n > 0);
+    if (!next) {
+        if (left === 0)
+            out.push([...acc]);
+        return;
+    }
+    if (left <= 0)
+        return;
+    const [key, n] = next;
+    const tile = proto.get(key);
+    if (n >= 3) {
+        counts.set(key, n - 3);
+        acc.push({ kind: 'pung', key });
+        enumerateSets(counts, proto, left - 1, acc, out);
+        acc.pop();
+        counts.set(key, n);
+    }
+    if (tile.kind === 'suit' && tile.rank <= 7) {
+        const k2 = `${tile.suit}:${tile.rank + 1}`, k3 = `${tile.suit}:${tile.rank + 2}`;
+        const n2 = counts.get(k2) ?? 0, n3 = counts.get(k3) ?? 0;
+        if (n2 > 0 && n3 > 0) {
+            counts.set(key, n - 1);
+            counts.set(k2, n2 - 1);
+            counts.set(k3, n3 - 1);
+            acc.push({ kind: 'chow', key });
+            enumerateSets(counts, proto, left - 1, acc, out);
+            acc.pop();
+            counts.set(key, n);
+            counts.set(k2, n2);
+            counts.set(k3, n3);
+        }
+    }
+}
 // Tenpai: one more tile of some type would complete the hand.
 export function isTenpai(concealed, melds) {
     return tileTypes.some(t => isWinningHandWithMelds([...concealed, t], melds));
@@ -101,7 +166,7 @@ export function canFormMeldOnlyHand(tiles) {
         return false;
     const counts = new Map();
     const proto = new Map();
-    for (const t of tiles) {
+    for (const t of sortTiles(tiles)) {
         const k = tileKey(t);
         counts.set(k, (counts.get(k) ?? 0) + 1);
         proto.set(k, t);

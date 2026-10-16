@@ -1,6 +1,7 @@
 import type { GameState, Meld, Seat, Tile } from '../types/mahjong.js';
 import { tileKey } from '../engine/tiles.js';
 import { deriveWinFlags } from '../engine/winContext.js';
+import { decompose, type Decomposition, type HandSet } from '../engine/winChecker.js';
 
 export type ScoreRuleId =
   | 'self_draw' | 'concealed' | 'concealed_self_draw'
@@ -71,43 +72,37 @@ const flowerSeatMap: Record<Seat, string[]> = {
 
 function isHonor(t: Tile): boolean { return t.kind === 'wind' || t.kind === 'dragon'; }
 function isExposed(m: Meld): boolean { return m.type !== 'kong' || !m.concealed; }
-function allTiles(state: GameState, winner: Seat): Tile[] {
-  const p = state.players[winner];
-  const concealed = [...p.concealed];
+// The concealed part of the final hand, including the winning tile on a discard win.
+function finalConcealed(state: GameState, winner: Seat): Tile[] {
+  const concealed = [...state.players[winner].concealed];
   if ((state.endReason === 'win' || state.endReason === 'rob_kong') && state.winningTile && !concealed.some(t => t.id === state.winningTile!.id)) concealed.push(state.winningTile);
-  return [...concealed, ...p.melds.flatMap(m => m.tiles)];
+  return concealed;
 }
-function tripletKeys(state: GameState, winner: Seat): string[] {
-  const p = state.players[winner];
-  const out: string[] = [];
-  for (const m of p.melds) if (m.type === 'pong' || m.type === 'kong') out.push(tileKey(m.tiles[0]));
-  const counts = new Map<string, number>();
-  for (const t of p.concealed) counts.set(tileKey(t),(counts.get(tileKey(t))??0)+1);
-  if ((state.endReason === 'win' || state.endReason === 'rob_kong') && state.winningTile) counts.set(tileKey(state.winningTile),(counts.get(tileKey(state.winningTile))??0)+1);
-  for (const [k,n] of counts) if (n >= 3) out.push(k);
-  return out;
+function chowHas(set: HandSet, key: string): boolean {
+  if (set.kind !== 'chow') return false;
+  const [suit, r] = set.key.split(':'); const [s2, r2] = key.split(':');
+  return suit === s2 && Number(r2) >= Number(r) && Number(r2) <= Number(r) + 2;
 }
-function countConcealedTriplets(state: GameState, winner: Seat): number {
-  const p = state.players[winner];
-  let n = p.melds.filter(m => m.type === 'kong' && m.concealed).length;
-  const counts = new Map<string, number>();
-  for (const t of p.concealed) counts.set(tileKey(t),(counts.get(tileKey(t))??0)+1);
-  if ((state.endReason === 'win' || state.endReason === 'rob_kong') && state.winningTile) counts.set(tileKey(state.winningTile),(counts.get(tileKey(state.winningTile))??0)+1);
-  for (const c of counts.values()) if (c >= 3) n++;
-  return n;
-}
-function pairKey(state: GameState, winner: Seat): string | undefined {
-  const counts = new Map<string, number>();
-  for (const t of state.players[winner].concealed) counts.set(tileKey(t),(counts.get(tileKey(t))??0)+1);
-  if ((state.endReason === 'win' || state.endReason === 'rob_kong') && state.winningTile) counts.set(tileKey(state.winningTile),(counts.get(tileKey(state.winningTile))??0)+1);
-  return [...counts.entries()].find(([,n]) => n % 3 === 2)?.[0];
-}
-function hasAnyChow(state: GameState, winner: Seat): boolean { return state.players[winner].melds.some(m => m.type === 'chow'); }
 
+// Scores the hand. A complete hand can often be split into sets in more than one way
+// (e.g. 111222333 as three pungs or three chows); every split is scored and the best one wins.
 export function scoreTaiwanHand(ctx: ScoreContext): ScoreResult {
   const {state,winner} = ctx;
   const winners = state.winners ?? (state.winner ? [state.winner] : []);
   if (state.phase !== 'ended' || !winners.includes(winner)) throw new Error('Game must be ended with this winner');
+  const p = state.players[winner];
+  const splits: (Decomposition | undefined)[] = decompose(finalConcealed(state, winner), 5 - p.melds.length);
+  if (!splits.length) splits.push(undefined);
+  let best: ScoreResult | undefined;
+  for (const split of splits) {
+    const r = scoreSplit(ctx, split);
+    if (!best || r.handTai > best.handTai) best = r;
+  }
+  return best!;
+}
+
+function scoreSplit(ctx: ScoreContext, split: Decomposition | undefined): ScoreResult {
+  const {state,winner} = ctx;
   const profile = ctx.profile ?? mahjongoTaiwanProfile;
   const derived = deriveWinFlags(state,winner);
   const flags: ScoreContextFlags = {...derived,...(ctx.flags ?? {})};
@@ -120,10 +115,14 @@ export function scoreTaiwanHand(ctx: ScoreContext): ScoreResult {
   if (isConcealed && isSelfDraw) add('concealed_self_draw','門清自摸');
   else { if (isConcealed) add('concealed','門清'); if (isSelfDraw) add('self_draw','自摸'); }
 
-  const triplets = tripletKeys(state,winner);
+  const setsInHand = split?.sets ?? [];
+  const meldPungs = p.melds.filter(m => m.type === 'pong' || m.type === 'kong').map(m => tileKey(m.tiles[0]));
+  const handPungs = setsInHand.filter(x => x.kind === 'pung').map(x => x.key);
+  const triplets = [...meldPungs, ...handPungs];
+  const pKey = split?.pair;
+
   const dragonKeys = ['dragon:red','dragon:green','dragon:white'];
   const dragonTriplets = dragonKeys.filter(k => triplets.includes(k)).length;
-  const pKey = pairKey(state,winner);
   const smallThree = dragonTriplets === 2 && !!pKey && dragonKeys.includes(pKey);
   const bigThree = dragonTriplets === 3;
   if (bigThree) add('big_three_dragons','大三元');
@@ -135,12 +134,10 @@ export function scoreTaiwanHand(ctx: ScoreContext): ScoreResult {
 
   const windKeys = ['wind:east','wind:south','wind:west','wind:north'];
   const windTriplets = windKeys.filter(k => triplets.includes(k)).length;
-  const smallFour = windTriplets === 3 && !!pKey && windKeys.includes(pKey);
-  const bigFour = windTriplets === 4;
-  if (bigFour) add('big_four_winds','大四喜');
-  else if (smallFour) add('small_four_winds','小四喜');
+  if (windTriplets === 4) add('big_four_winds','大四喜');
+  else if (windTriplets === 3 && !!pKey && windKeys.includes(pKey)) add('small_four_winds','小四喜');
 
-  const tiles = allTiles(state,winner).filter(t => t.kind !== 'flower');
+  const tiles = [...finalConcealed(state, winner), ...p.melds.flatMap(m => m.tiles)].filter(t => t.kind !== 'flower');
   const suits = new Set(tiles.filter(t => t.kind === 'suit').map(t => t.kind==='suit'?t.suit:''));
   const hasHonors = tiles.some(isHonor);
   const hasSuit = tiles.some(t => t.kind === 'suit');
@@ -148,21 +145,26 @@ export function scoreTaiwanHand(ctx: ScoreContext): ScoreResult {
   if (hasSuit && suits.size === 1 && !hasHonors) add('full_flush','清一色');
   if (!hasSuit && hasHonors) add('all_honors','字一色');
 
-  const meldCount = p.melds.length;
-  const concealedTriplets = countConcealedTriplets(state,winner);
-  const chowLikely = hasAnyChow(state,winner) || tiles.filter(t=>t.kind==='suit').length >= 3;
-  const allPungs = triplets.length >= 5 || (meldCount + concealedTriplets >= 5 && !hasAnyChow(state,winner));
+  const meldChows = p.melds.some(m => m.type === 'chow');
+  const allPungs = !!split && !meldChows && setsInHand.every(x => x.kind === 'pung');
   if (allPungs) add('all_pungs','碰碰胡');
+
+  // Concealed pungs: concealed kongs + pungs in the hand. On a discard win, a pung that
+  // can only have been completed by the winning tile counts as exposed.
+  let concealedTriplets = p.melds.filter(m => m.type === 'kong' && m.concealed).length + handPungs.length;
+  const wt = state.winningTile;
+  if (!isSelfDraw && wt) {
+    const k = tileKey(wt);
+    if (handPungs.includes(k) && pKey !== k && !setsInHand.some(x => chowHas(x, k))) concealedTriplets--;
+  }
   if (concealedTriplets >= 5) add('five_concealed_triplets','五暗坎');
   else if (concealedTriplets >= 4) add('four_concealed_triplets','四暗坎');
   else if (concealedTriplets >= 3) add('three_concealed_triplets','三暗坎');
 
-  const allExposed = p.melds.length === 5 && !isSelfDraw;
-  if (allExposed) add('all_exposed','全求');
+  if (p.melds.length === 5 && !isSelfDraw) add('all_exposed','全求');
 
-  const noHonors = !tiles.some(isHonor);
-  const allChows = !allPungs && !triplets.length && chowLikely;
-  if (allChows && noHonors && p.flowers.length===0 && !isSelfDraw && !flags.singleWait && !flags.edgeWait && !flags.closedWait) add('pinfu','平糊');
+  const allChows = !!split && !meldPungs.length && setsInHand.every(x => x.kind === 'chow');
+  if (allChows && !hasHonors && p.flowers.length===0 && !isSelfDraw && !flags.singleWait && !flags.edgeWait && !flags.closedWait) add('pinfu','平糊');
 
   for (const f of p.flowers) if (f.kind==='flower' && flowerSeatMap[winner].includes(f.flower)) add('matching_flower','正花');
   if (flags.declaredReady) add('declared_ready','聽牌');

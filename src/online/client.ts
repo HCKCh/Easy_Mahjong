@@ -31,9 +31,11 @@ let hapticsEnabled=localStorage.getItem('tw-mj-haptics')!=='0';
 let pendingDiscardId:string|undefined;
 let callFlash:{text:string;kind:'call'|'win'}|undefined;
 let flashTimer:number|undefined;
-// 胡牌動畫：誰胡就跳出誰的 cut-in，播完才顯示結算
-let winCutIn:{seats:Seat[];selfDraw:boolean}|undefined;
-let cutInTimer:number|undefined;
+// 結算畫面（胡牌動畫＋結算合一）：同一局的結算只播一次進場動畫
+let resultAnimKey='';
+let resultAnimAt=0;
+// 手機結算畫面的分頁：結果／所有人的牌／算式
+let resultTab:'result'|'hands'|'pay'='result';
 // 剛摸的牌只在第一次出現時播放摸牌動畫
 let animatedDrawId:string|undefined;
 // 反應選單同一個（同一個截止時間）只播一次彈出動畫
@@ -62,13 +64,7 @@ function lineInvite():void{const text=`${t('lineText',{code:snapshot?.code??''})
 function feedbackForSnapshot(prev:RoomSnapshot|undefined,next:RoomSnapshot):void{
   const pg=prev?.game,ng=next.game;if(!ng)return;
   if(ng.settlement&&!pg?.settlement){
-    playSound('win',soundEnabled);vibrate([70,45,120]);
-    if(ng.settlement.winners.length){
-      winCutIn={seats:ng.settlement.winners,selfDraw:ng.settlement.endReason==='self_draw'};
-      if(cutInTimer)clearTimeout(cutInTimer);
-      const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      cutInTimer=window.setTimeout(()=>{winCutIn=undefined;render();},reduce?1500:2900+ng.settlement.winners.length*250);
-    }
+    if(ng.settlement.winners.length){playSound('win',soundEnabled);vibrate([70,45,120]);}
     return;
   }
   for(const s of seats){const before=prev?.players[s]?.melds?.length??0;const after=next.players[s]?.melds?.length??0;if(after>before){const m=next.players[s]?.melds?.[after-1];if(m){const cue=m.type==='chow'?'chow':m.type==='pong'?'pong':'kong';playSound(cue,soundEnabled);vibrate(m.type==='kong'?[45,35,65]:45);flash(t(m.type==='chow'?'chow':m.type==='pong'?'pong':'kong'));return;}}}
@@ -160,7 +156,7 @@ function playerMeta(p:PublicPlayer|undefined,s:Seat):string{
 }
 function opponent(p:PublicPlayer|undefined,s:Seat,pos:'top'|'left'|'right'):string{
   if(!p)return `<section class="opp ${pos}">${playerMeta(undefined,s)}</section>`;
-  return `<section class="opp ${pos} ${snapshot?.game?.turn===s?'active':''}">${metaStack(p,s)}<div class="backs">${Array.from({length:p.concealedCount},()=>tileHtml(undefined as never,{small:true,hidden:true})).join('')}</div><div class="melds">${p.melds.map(meldHtml).join('')}</div></section>`;
+  return `<section class="opp ${pos} ${snapshot?.game?.turn===s?'active':''}">${metaStack(p,s)}<div class="backs ${p.concealed?'revealed':''}">${p.concealed?p.concealed.map(x=>tileHtml(x,{small:true})).join(''):Array.from({length:p.concealedCount},()=>tileHtml(undefined as never,{small:true,hidden:true})).join('')}</div><div class="melds">${p.melds.map(meldHtml).join('')}</div></section>`;
 }
 // 花牌擺在名字上方（小牌，一列最多四張），滑鼠移上去可看名稱
 function metaStack(p:PublicPlayer,s:Seat):string{return `<div class="meta-stack">${flowerRow(p)}${playerMeta(p,s)}</div>`;}
@@ -221,21 +217,56 @@ function actionBar():string{
   if(g.phase==='awaiting_discard'&&g.turn===me.seat){const sel=!p.declaredReady&&selected?(p.concealed??[]).find(t=>t.id===selected):undefined;const riichi=sel&&tenpaiInfo(p).byDiscard.has(tileKey(sel))?`<button class="win" data-act="riichi" data-id="${esc(sel.id)}">${t('declareReady',{tile:tileName(sel)})}</button>`:'';const special=`${riichi}${g.canSelfDraw?`<button class="win" data-act="tsumo">${t('selfDraw')}</button>`:''}${g.concealedKongs.map(k=>`<button data-act="ck" data-id="${k.id}">${t('concealedKong',{tile:tileName(k)})}</button>`).join('')}${g.addedKongs.map(k=>`<button data-act="ak" data-id="${k.id}">${t('addedKong',{tile:tileName(k)})}</button>`).join('')}`;return special?`<div class="actions own-actions">${special}</div>`:'';}
   return'';
 }
-// 胡牌 cut-in：胡的人用自己的頭像（開心），輸的人（要付錢的）頭像全部擺上去（驚嚇）
+// 結算畫面：胡牌橫幅（開心頭像＋加分）→ 胡牌牌組與台數 → 其他人（輸的人哭哭臉＋扣分；放槍那張擺在旁邊）→ 所有人手牌 → 牌數檢查
 const bandColors:Record<Seat,string>={east:'#c62828',south:'#1f5fb8',west:'#6f3aa8',north:'#1d7a4a'};
 function faceOf(s:Seat,mood:'happy'|'shock'):string{return avatarSvg(seatPlayer(s)?.avatar??seats.indexOf(s),mood);}
-function cutInHtml():string{
-  if(!winCutIn)return'';
-  const word=winCutIn.selfDraw?t('cutInSelfDraw'):t('cutInWin');
-  const losers=[...new Set((snapshot?.game?.settlement?.payments??[]).map(p=>p.from))].filter(s=>!winCutIn!.seats.includes(s));
-  const bands=winCutIn.seats.map((s,i)=>`<div class="cutin-band" style="--band:${bandColors[s]};--delay:${i*.25}s"><div class="cutin-face">${faceOf(s,'happy')}</div><div class="cutin-copy"><div class="cutin-word">${word}</div><div class="cutin-name">${esc(nameOf(s))}</div></div></div>`).join('');
-  const loserRow=losers.length?`<div class="cutin-losers" style="--delay:${.45+winCutIn.seats.length*.25}s">${losers.map(s=>`<div class="cutin-loser"><div class="cutin-loser-face">${faceOf(s,'shock')}</div><span>${esc(nameOf(s))}</span></div>`).join('')}</div>`:'';
-  return `<div class="win-cutin" aria-live="assertive">${bands}${loserRow}</div>`;
+function signed(n:number):string{return n>0?`+${n}`:`${n}`;}
+function resTiles(tiles:Tile[],cls='res-tile'):string{return tiles.map(x=>miniTile(x,cls)).join('');}
+// 副露＋手牌；hideId 用來把胡的那張從手牌拿出來另外擺
+function handRow(s:Seat,hideId?:string):string{
+  const p=seatPlayer(s);if(!p)return'';
+  const concealed=(p.concealed??[]).filter(x=>x.id!==hideId);
+  return `${p.melds.map(m=>`<span class="res-meld">${resTiles(m.tiles)}</span>`).join('')}<span class="res-concealed">${resTiles(concealed)}</span>`;
 }
-function settlement():string{
-  if(winCutIn)return cutInHtml();
-  const s=snapshot?.game?.settlement;if(!s)return'';
-  return `<div class="result-overlay"><div class="result"><div class="result-kicker">${roundText(snapshot?.game?.roundLabel??'')}</div><h2>${s.endReason==='wall_exhausted'?t('drawGame'):t('handOver')}</h2><h3>${s.winners.map(w=>esc(nameOf(w))).join(lang==='zh'?'、':', ')}</h3>${s.lines.map(x=>`<div class="score-line"><span>${esc(scoreLabel(x.label))}</span><b>${t('taiUnit',{n:x.tai})}</b></div>`).join('')}<div class="payments">${s.payments.map(p=>`<p>${esc(nameOf(p.from))} → ${esc(nameOf(p.to))}: ${p.amount}</p>`).join('')}</div>${snapshot?.hostClientId===snapshot?.you?.clientId?`<button class="primary wide" data-act="next">${t('nextHand')}</button>`:`<p>${t('waitHostNext')}</p>`}</div></div>`;
+function resultOverlay():string{
+  const g=snapshot?.game,s=g?.settlement;if(!g||!s)return'';
+  const key=JSON.stringify([g.roundLabel,s.winners,s.payments,s.winningTile?.id]);
+  // 重畫時用 --elapsed 讓動畫從原本播到的地方接著播；播完（4 秒後）就完全靜止
+  if(key!==resultAnimKey){resultAnimKey=key;resultAnimAt=Date.now();resultTab='result';}
+  const elapsed=(Date.now()-resultAnimAt)/1000,still=elapsed>4;
+  const selfDraw=s.endReason==='self_draw',won=s.winners.length>0;
+  const delta=new Map<Seat,number>(seats.map(x=>[x,0]));
+  for(const p of s.payments){delta.set(p.to,delta.get(p.to)!+p.amount);delta.set(p.from,delta.get(p.from)!-p.amount);}
+  // 搶槓時胡的那張還在被搶者手裡，攤牌時拿掉避免重複
+  const hideFor=(x:Seat)=>selfDraw&&s.winners.includes(x)?s.winningTile?.id:s.endReason==='rob_kong'&&x===s.winFrom?s.winningTile?.id:undefined;
+  const word=selfDraw?t('cutInSelfDraw'):t('cutInWin');
+  const bands=s.winners.map((w,i)=>`<div class="cutin-band" style="--band:${bandColors[w]};--delay:${i*.25}s"><div class="cutin-face">${faceOf(w,'happy')}</div><div class="cutin-copy"><div class="cutin-word">${word}</div><div class="cutin-name">${esc(nameOf(w))} <b class="res-plus">${signed(delta.get(w)!)}</b></div></div></div>`).join('');
+  const details=s.details?.length?s.details:s.winners.map(w=>({seat:w,handTai:s.handTai??0,lines:s.lines}));
+  const winHands=details.map(d=>`<section class="res-win"><div class="res-win-head"><span class="res-mini-face">${faceOf(d.seat,'happy')}</span><b>${esc(nameOf(d.seat))}</b><span class="res-total">${d.handTai?t('totalTai',{n:d.handTai}):t('zeroTai')}</span></div><div class="res-hand">${handRow(d.seat,hideFor(d.seat))}${selfDraw&&s.winningTile?`<span class="res-winning">${resTiles([s.winningTile],'res-tile win-tile')}<small>${t('selfDraw')}</small></span>`:''}</div>${d.lines.length?`<div class="res-lines">${d.lines.map(x=>`<span>${esc(scoreLabel(x.label))} <b>${t('taiUnit',{n:x.tai})}</b></span>`).join('')}</div>`:''}</section>`).join('');
+  const people=seats.filter(x=>!s.winners.includes(x)).map(x=>{
+    const d=delta.get(x)!,lost=d<0,dealIn=!selfDraw&&won&&s.winFrom===x&&s.winningTile;
+    return `<div class="res-person ${lost?'lost':''}"><div class="res-face">${faceOf(x,lost?'shock':'happy')}</div>${dealIn?`<div class="res-dealin">${resTiles([s.winningTile!],'res-tile win-tile')}<small>${t('dealtIn')}</small></div>`:''}<div class="res-person-copy"><b>${esc(nameOf(x))}</b><span class="${lost?'neg':''}">${signed(d)}</span></div></div>`;
+  }).join('');
+  // 每一筆付款的算式：底 ＋ 台 × 每台；台數＝牌型台數＋莊家台（胡牌者或付錢的人是莊家時才有）
+  const st=snapshot!.settings;
+  const handTaiOf=(x:Seat)=>details.find(d=>d.seat===x)?.handTai??0;
+  const payLines=s.payments.map(p=>{const hand=handTaiOf(p.to),dealer=p.tai-hand;return `<li><b>${esc(nameOf(p.from))} → ${esc(nameOf(p.to))}</b> ${t('payLine',{tai:p.tai,base:st.base,per:st.perTai,amount:p.amount})}${dealer>0?` <small>${t('payTaiBreak',{hand,dealer})}</small>`:''}</li>`;}).join('');
+  const hasDealer=s.payments.some(p=>p.tai>handTaiOf(p.to));
+  const wide=window.matchMedia('(min-width:1120px) and (min-height:601px)').matches;
+  // 手機上由分頁決定顯示哪一塊，所以 details 一律展開
+  const payBox=s.payments.length?`<details class="res-pay" open><summary>${t('paymentsTitle')}</summary><ul>${payLines}</ul>${hasDealer?`<p>${t('dealerNote')}</p>`:''}</details>`:'';
+  const allHands=`<details class="res-all" ${wide&&won?'':'open'}><summary>${t('allHands')}</summary>${seats.map(x=>`<div class="res-all-row"><span class="res-mini-face">${faceOf(x,'happy')}</span><b>${esc(nameOf(x))}</b><div class="res-hand">${handRow(x,hideFor(x))}${(seatPlayer(x)?.flowers.length)?`<span class="res-flowers">${resTiles(seatPlayer(x)!.flowers)}</span>`:''}</div></div>`).join('')}</details>`;
+  const a=s.audit;
+  // 牌數檢查只在出錯時顯示
+  const audit=a&&!a.ok?`<p class="res-audit bad">${t('tileCheckBad',{msg:esc(a.problems.join('; '))})}</p>`:'';
+  // 倒數：數字由 updatePromptCountdown 每 0.25 秒更新
+  const cd=s.nextDeadline?`<b class="next-countdown" data-deadline="${s.nextDeadline}">${Math.max(0,Math.ceil((s.nextDeadline-Date.now())/1000))}</b>`:'';
+  const footer=snapshot?.hostClientId===snapshot?.you?.clientId?`<button class="primary wide" data-act="next">${t('nextHand')}${cd?` (${cd})`:''}</button>`:`<p class="res-wait">${cd?t('autoNextIn',{n:cd}):t('waitHostNext')}</p>`;
+  const tab=(id:typeof resultTab,label:string)=>`<button class="${resultTab===id?'active':''}" data-rtab="${id}">${label}</button>`;
+  const tabs=`<div class="res-tabs">${tab('result',t('tabResult'))}${tab('hands',t('allHands'))}${s.payments.length?tab('pay',t('paymentsTitle')):''}</div>`;
+  // 手機：動畫播完橫幅收起，改用卡片頂端一行摘要
+  const head=won?s.winners.map(w=>`<span class="res-head-item"><span class="res-mini-face">${faceOf(w,'happy')}</span><b class="res-head-word">${word}</b><span class="res-head-name">${esc(nameOf(w))}</span><b class="res-plus">${signed(delta.get(w)!)}</b></span>`).join(''):`<b class="res-head-word">${t('drawGame')}</b>`;
+  return `<div class="win-result ${won?'has-bands':''} ${still?'still':''}" style="--elapsed:${elapsed.toFixed(2)}s" aria-live="assertive">${won?`<div class="res-bands">${bands}</div>`:`<div class="res-draw-title">${t('drawGame')}</div>`}<div class="result-panel tab-${resultTab}" style="--panel-delay:${won?.55+s.winners.length*.25:0}s"><div class="result-kicker">${roundText(g.roundLabel)}</div><div class="res-head">${head}<span class="res-head-round">${roundText(g.roundLabel)}</span></div>${tabs}<div class="res-body"><div class="res-tab res-tab-result"><div class="res-wins">${winHands}</div><div class="res-people">${people}</div></div><div class="res-tab res-tab-hands">${allHands}</div><div class="res-tab res-tab-pay">${payBox}</div></div><div class="res-foot">${audit}${footer}</div></div></div>`;
 }
 function nameOf(s:Seat):string{const p=seatPlayer(s);return p?playerName(p.name):seatLong(s);}
 function soundLabel():string{return soundEnabled?t('soundOn'):t('soundOff');}
@@ -264,7 +295,7 @@ function game():string{
   const tenpai=tenpaiInfo(p);
   const drawAnim=g.lastDrawId!==animatedDrawId;animatedDrawId=g.lastDrawId;
   const latest=g.lastDiscard?`<div class="last">${t('latest',{seat:seatLong(g.lastDiscard.seat),tile:tileName(g.lastDiscard.tile)})}</div>`:'';
-  return `<div class="online-shell"><header><a href="./">${t('brand')}</a><div class="header-mid"><b>${roundText(g.roundLabel)}</b><span class="desktop-only"> · ${t('roomCodeShort',{code:snapshot!.code})}</span> · ${g.turn===mySeat?`<strong class="your-turn">${t('yourTurn')}</strong>`:t('waitingFor',{name:esc(nameOf(g.turn))})}</div><div class="header-score desktop-only">${seats.map(s=>`${seatShort(s)} ${scoreText(g.totals[s])}`).join('　')}</div><button class="game-menu" data-act="info" aria-label="${t('roomInfo')}">☰</button></header><div class="game-layout"><main class="table-area"><div class="table-wrap"><div class="table">${wallRail('top')}${wallRail('right')}${wallRail('bottom')}${wallRail('left')}${(['top','left','right'] as const).map(pos=>{const s=posMap[pos]!;return opponent(seatPlayer(s),s,pos);}).join('')}<div class="center"><div><div class="round">${roundText(g.roundLabel)}</div><strong>${g.wallCount}</strong><small>${t('wallLeft')}</small><div class="stakes">${snapshot!.settings.base} / ${snapshot!.settings.perTai}</div><div class="continuation">${g.dealerContinuations?t('streakN',{n:g.dealerContinuations}):' '}</div>${latest}</div></div>${seats.map(s=>river(seatPlayer(s),relativePos(mySeat,s))).join('')}<section class="you ${g.turn===mySeat?'active':''}"><div class="hand-actions">${actionBar()}</div>${tenpaiHint(p,canDiscard)}${metaStack(p,mySeat)}<div class="melds">${p.melds.map(meldHtml).join('')}</div><div class="hand">${handInDrawOrder(p.concealed??[],g.lastDrawId).map(t=>tileHtml(t,{selected:selected===t.id,clickable:canDiscard&&(!p.declaredReady||t.id===g.lastDrawId),drawn:g.lastDrawId===t.id,pending:pendingDiscardId===t.id,cls:[canDiscard&&tenpai.byDiscard.has(tileKey(t))?'tenpai-discard':'',g.lastDrawId===t.id&&!drawAnim?'settled':''].join(' ')})).join('')}</div></section></div></div><div class="actionbar"></div></main>${sidePanel()}</div><div class="mobile-sheet ${infoOpen?'open':''}">${infoContent()}</div><div class="sheet-scrim ${infoOpen?'open':''}" data-act="closeinfo"></div><div class="rotate-hint"><div>↻</div><b>${t('rotateTitle')}</b><span>${t('rotateBody')}</span><button data-act="fullscreen">${t('enterFullscreen')}</button></div>${callFlash?`<div class="call-flash ${callFlash.kind}">${callFlash.text}</div>`:''}${settlement()}${qrModal()}${connectionBadge()}</div>`;
+  return `<div class="online-shell"><header><a href="./">${t('brand')}</a><div class="header-mid"><b>${roundText(g.roundLabel)}</b><span class="desktop-only"> · ${t('roomCodeShort',{code:snapshot!.code})}</span> · ${g.turn===mySeat?`<strong class="your-turn">${t('yourTurn')}</strong>`:t('waitingFor',{name:esc(nameOf(g.turn))})}</div><div class="header-score desktop-only">${seats.map(s=>`${seatShort(s)} ${scoreText(g.totals[s])}`).join('　')}</div><button class="game-menu" data-act="info" aria-label="${t('roomInfo')}">☰</button></header><div class="game-layout"><main class="table-area"><div class="table-wrap"><div class="table">${wallRail('top')}${wallRail('right')}${wallRail('bottom')}${wallRail('left')}${(['top','left','right'] as const).map(pos=>{const s=posMap[pos]!;return opponent(seatPlayer(s),s,pos);}).join('')}<div class="center"><div><div class="round">${roundText(g.roundLabel)}</div><strong>${g.wallCount}</strong><small>${t('wallLeft')}</small><div class="stakes">${snapshot!.settings.base} / ${snapshot!.settings.perTai}</div><div class="continuation">${g.dealerContinuations?t('streakN',{n:g.dealerContinuations}):' '}</div>${latest}</div></div>${seats.map(s=>river(seatPlayer(s),relativePos(mySeat,s))).join('')}<section class="you ${g.turn===mySeat?'active':''}"><div class="hand-actions">${actionBar()}</div>${tenpaiHint(p,canDiscard)}${metaStack(p,mySeat)}<div class="melds">${p.melds.map(meldHtml).join('')}</div><div class="hand">${handInDrawOrder(p.concealed??[],g.lastDrawId).map(t=>tileHtml(t,{selected:selected===t.id,clickable:canDiscard&&(!p.declaredReady||t.id===g.lastDrawId),drawn:g.lastDrawId===t.id,pending:pendingDiscardId===t.id,cls:[canDiscard&&tenpai.byDiscard.has(tileKey(t))?'tenpai-discard':'',g.lastDrawId===t.id&&!drawAnim?'settled':''].join(' ')})).join('')}</div></section></div></div><div class="actionbar"></div></main>${sidePanel()}</div><div class="mobile-sheet ${infoOpen?'open':''}">${infoContent()}</div><div class="sheet-scrim ${infoOpen?'open':''}" data-act="closeinfo"></div><div class="rotate-hint"><div>↻</div><b>${t('rotateTitle')}</b><span>${t('rotateBody')}</span><button data-act="fullscreen">${t('enterFullscreen')}</button></div>${callFlash?`<div class="call-flash ${callFlash.kind}">${callFlash.text}</div>`:''}${resultOverlay()}${qrModal()}${connectionBadge()}</div>`;
 }
 function render():void{if(!snapshot)app.innerHTML=startScreen();else if(snapshot.status==='wind')app.innerHTML=windScreen();else if(snapshot.status==='lobby')app.innerHTML=lobby();else app.innerHTML=game();bind();updatePromptCountdown();}
 async function shareInvite():Promise<void>{
@@ -281,6 +312,7 @@ async function installPwa():Promise<void>{
   alert(t('installHelp'));
 }
 function updatePromptCountdown():void{
+  document.querySelectorAll<HTMLElement>('.next-countdown').forEach(x=>{x.textContent=String(Math.max(0,Math.ceil((Number(x.dataset.deadline)-Date.now())/1000)));});
   const el=document.querySelector<HTMLElement>('#reaction-countdown,#wind-countdown');if(!el)return;
   const deadline=Number(el.dataset.deadline||0);const left=Math.max(0,Math.ceil((deadline-Date.now())/1000));el.textContent=`${left}s`;
 }
@@ -333,6 +365,14 @@ function bind():void{
       pendingDiscardId=id;playSound('discard',soundEnabled);vibrate(32);render();
       window.setTimeout(()=>{send({type:'ACTION',action:'DISCARD',tileId:id});selected=undefined;pendingDiscardId=undefined;},120);
     }else{selected=id;playSound('button',soundEnabled);vibrate(12);render();}
+  });
+  // 切分頁只換 class，不重畫整個畫面（避免閃爍、卡片大小不變）
+  document.querySelectorAll<HTMLElement>('[data-rtab]').forEach(el=>el.onclick=()=>{
+    resultTab=el.dataset.rtab as typeof resultTab;playSound('button',soundEnabled);
+    const panel=el.closest('.result-panel');if(!panel){render();return;}
+    panel.classList.remove('tab-result','tab-hands','tab-pay');panel.classList.add(`tab-${resultTab}`);
+    panel.querySelectorAll<HTMLElement>('[data-rtab]').forEach(b=>b.classList.toggle('active',b===el));
+    panel.querySelector('.res-body')?.scrollTo(0,0);
   });
   document.querySelectorAll<HTMLElement>('[data-avatar]').forEach(el=>el.onclick=()=>{
     const input=document.querySelector<HTMLInputElement>('#name');if(input)name=input.value;

@@ -1,6 +1,6 @@
 import type { GameState, Seat, Tile } from '../types/mahjong.js';
 import { tileKey } from './tiles.js';
-import { canFormMeldOnlyHand, isStandardWinningHand } from './winChecker.js';
+import { canFormMeldOnlyHand, isStandardWinningHand, winningTileTypes } from './winChecker.js';
 
 export interface DerivedWinFlags {
   kongBlossom: boolean;
@@ -34,6 +34,8 @@ function deriveWait(state:GameState,winner:Seat):Pick<DerivedWinFlags,'edgeWait'
   if(!wt) return {edgeWait:false,closedWait:false,singleWait:false};
   let pre=removeOneByKey(finalConcealed(state,winner),tileKey(wt));
   if(!pre) return {edgeWait:false,closedWait:false,singleWait:false};
+  // 邊張／中洞／單吊只在「獨聽」時計台：聽的牌只有這一種
+  if(winningTileTypes(pre,state.players[winner].melds).length!==1) return {edgeWait:false,closedWait:false,singleWait:false};
 
   const pairRest=removeOneByKey(pre,tileKey(wt));
   const singleWait=!!pairRest && canFormMeldOnlyHand(pairRest);

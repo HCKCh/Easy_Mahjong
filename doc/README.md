@@ -7,6 +7,7 @@ These pages explain what each part of the code does and how the project was buil
 3. [Game server](server.md): `online-server.mjs` and `persistence.mjs`, covering rooms, the wire protocol, the seat draw, AI scheduling and storage.
 4. [Browser client](client.md): `src/online/client.ts`, the AI and tenpai helpers in `src/web`, rendering, sound and the PWA.
 5. [How it was built](development-log.md): the stages the project went through and the design decisions behind them.
+6. [Modifications](modification.md): dated list of changes made after the `v0` release.
 
 For setup and deployment, see the main [README](../README.md) and [DEPLOYMENT.md](../DEPLOYMENT.md).
 
@@ -29,7 +30,8 @@ For setup and deployment, see the main [README](../README.md) and [DEPLOYMENT.md
 | `src/online/i18n.ts` | Chinese / English strings and translation of server text |
 | `src/web/bot.ts`, `aiMath.ts` | AI decision making (shanten / effective tiles) |
 | `src/web/tenpai.ts` | Tenpai helper used by the UI |
-| `src/**/*.test.ts` | Unit tests (vitest): tenpai helper, declare-ready rules |
+| `src/**/*.test.ts` | Unit tests (vitest): tenpai helper, declare-ready rules, tile audit, win detection and scoring |
+| `src/core/engine/audit.ts` | Tile check: all 144 tiles accounted for, none lost or duplicated |
 | `src/web/tileView.ts` | Tile labels and SVG tile faces |
 | `src/web/sound.ts` | Synthesized sound effects |
 | `src/web/app.ts` + `controller.ts`, `session.ts`, `replay.ts`, `stats.ts` | Legacy offline single-player app (`solo-classic.html`) |

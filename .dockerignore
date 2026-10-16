@@ -9,3 +9,6 @@ docker-compose*.yml
 Caddyfile
 Dockerfile
 .dockerignore
+*token
+**/*token
+.git

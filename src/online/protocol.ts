@@ -8,12 +8,19 @@ export interface PublicPlayer {
 export interface PublicSettlement {
   winners:Seat[]; endReason?:string; lines:{label:string;tai:number}[];
   handTai?:number; payments:{from:Seat;to:Seat;tai:number;amount:number}[];
+  // 胡的那張牌與放槍者（自摸時沒有 winFrom）；牌數檢查結果
+  winningTile?:Tile; winFrom?:Seat;
+  // 倒數結束時自動開下一局（沒有就是停用）
+  nextDeadline?:number;
+  // 每位胡牌者各自的台數明細（一炮多響時有多筆）
+  details?:{seat:Seat;handTai:number;lines:{label:string;tai:number}[]}[];
+  audit?:{ok:boolean;total:number;suits:number;honors:number;flowers:number;problems:string[]};
 }
 export interface RoomSnapshot {
   code:string; hostClientId:string; you?:{clientId:string;seat?:Seat;name:string};
   status:'lobby'|'wind'|'playing'|'ended';
   players:Partial<Record<Seat,PublicPlayer>>;
-  settings:{base:number;perTai:number;ronMode:'single'|'multiple';reactionSeconds:number};
+  settings:{base:number;perTai:number;ronMode:'single'|'multiple';reactionSeconds:number;nextHandSeconds?:number};
   game?:{
     phase:GamePhase; turn:Seat; dealer:Seat; wallCount:number; deadWallCount:number;
     lastDiscard?:{seat:Seat;tile:Tile}; lastDrawId?:string;
